@@ -1,10 +1,12 @@
-# [Project name]
+# Material Loss Intelligence
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Bilingual English/Arabic production-job accounting: record material outcomes, validate balance, close jobs, compare scrap, and support investigations.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- Managed workflows: `artifacts/api-server: API Server` and `artifacts/material-loss: web`.
+- `pnpm --filter @workspace/material-accounting test` — deterministic accounting tests.
+- `node scripts/test-material-api.mjs` — API checks through the running shared proxy, using an isolated synthetic demo workspace.
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
@@ -22,23 +24,38 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/material-loss`: React interface and translation resources.
+- `artifacts/api-server`: authentication, workspace ownership, job APIs, and constrained insights.
+- `lib/material-accounting`: shared calculations, closure validation, historical comparisons, and aggregates.
+- `lib/api-spec/openapi.yaml`: contract for generated clients and validators.
+- `lib/db`: PostgreSQL schemas.
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- All weights are kilograms with at most three decimal places; calculations balance integer grams to avoid tolerance-edge rounding errors.
+- Demo browsers receive isolated synthetic workspaces. Real records require sign-in and are owned by the authenticated account; team membership is not part of this MVP.
+- AI selects permitted investigation prompts. Numeric narrative is rendered from validated evidence, preventing invented metrics or unsupported causes.
+- A closed job retains its closure tolerance even if workspace settings later change.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Dashboard, job search/filters, draft entry/editing, validated closure, reason-required reopening, investigation notes, direct comparison, and minimum-history baseline.
+- Demo jobs IK-202 and IK-203 reproduce the pilot figures. IK-204 is intentionally unbalanced. Demo dates and material/product names are synthetic.
+- Private workspaces start empty. Machines, materials, and products are free-entry values with suggestions from prior jobs.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Arabic/English and RTL/LTR are first-class MVP requirements, including all error states and insights.
+- Preserve user-entered content when switching language.
+- Core workflow must remain usable on phones and tablets without horizontal page overflow.
+- Scrap is waste; reusable offcuts and rework are separate outcomes, never scrap.
+- Do not expand into ERP, cutting optimization, offcut inventory, billing, machine integrations, or advanced roles.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Do not add runtime schema creation. Update Drizzle schemas and apply changes to the development database.
+- Run API codegen after contract changes. The Zod output deliberately omits duplicate TypeScript schema generation to avoid path/query type-name collisions.
+- Public demo data is not suitable for confidential records; use a signed-in private workspace.
 
 ## Pointers
 

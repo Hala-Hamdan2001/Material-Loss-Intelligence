@@ -1,0 +1,400 @@
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+
+const en = {
+  app: {
+    name: 'Material Loss Intelligence',
+    short: 'MLI',
+    tagline: 'Account for every kilogram',
+    skip: 'Skip to content',
+  },
+  nav: { dashboard: 'Dashboard', jobs: 'Jobs', newJob: 'New job', settings: 'Settings', menu: 'Main navigation' },
+  lang: { switchTo: 'العربية', label: 'Language' },
+  workspace: {
+    demo: 'Demo workspace',
+    private: 'Private workspace',
+    synthetic: 'Synthetic data and dates for demonstration only',
+    syntheticShort: 'Synthetic demo data',
+    switchPrivate: 'Use private workspace',
+    switchDemo: 'Use demo workspace',
+    login: 'Log in',
+    logout: 'Log out',
+    loginNeeded: 'Log in to use a private workspace',
+    signedInAs: 'Signed in as {{name}}',
+    notSignedIn: 'Not signed in',
+    switched: 'Workspace switched',
+    switching: 'Switching workspace',
+    loading: 'Loading workspace',
+    loadError: 'The workspace could not be loaded.',
+    emptyPrivate: 'Your private workspace is empty. Record your first job to begin.',
+    expired: 'Your session has expired. Log in again or continue in the demo workspace.',
+    loginLoses: 'Logging in reloads the page. Save any draft first; unsaved changes on this page will be lost.',
+  },
+  common: {
+    retry: 'Retry', cancel: 'Cancel', save: 'Save', back: 'Back', edit: 'Edit', close: 'Close', view: 'View',
+    loading: 'Loading', kg: 'kg', all: 'All', clear: 'Clear filters', from: 'From', to: 'To', apply: 'Apply',
+    none: 'None', yes: 'Yes', no: 'No', optional: 'optional', required: 'required', emptyValue: 'Not set',
+    textEquivalent: 'Text equivalent', reload: 'Reload latest',
+  },
+  status: { draft: 'Draft', closed: 'Closed', all: 'All statuses' },
+  signals: {
+    high_scrap: 'High scrap',
+    above_baseline: 'Above machine baseline',
+    insufficient_history: 'Insufficient history',
+    high_scrap_desc: 'Scrap rate is above the workspace threshold of {{value}}.',
+    above_baseline_desc: 'Scrap rate exceeds this machine, material and product baseline.',
+    insufficient_history_desc: 'Fewer than 5 comparable closed jobs in the last 90 days.',
+  },
+  outcome: {
+    good: 'Good output', scrap: 'Scrap', reusable: 'Reusable', rework: 'Rework', residual: 'Residual',
+    issued: 'Issued', accounted: 'Accounted', unaccounted: 'Unaccounted',
+    goodHint: 'Shipped as conforming product',
+    scrapHint: 'Lost material, cannot return to process',
+    reusableHint: 'Returns to stock, not a loss',
+    reworkHint: 'Needs further processing',
+  },
+  reasons: {
+    setup_layout: 'Setup and layout',
+    damaged: 'Damaged material',
+    unspecified_demo: 'Unspecified (legacy demo)',
+    custom: 'Custom reason',
+    choose: 'Choose a reason',
+  },
+  metrics: {
+    yield: 'Yield', scrapRate: 'Scrap rate', reusableRate: 'Reusable rate', reworkRate: 'Rework rate',
+    weightedYield: 'Weighted yield', weightedScrap: 'Weighted scrap rate',
+    largest: 'Largest scrap reason', contribution: '{{value}} of scrap',
+    totalJobs: 'Total jobs', drafts: '{{count}} drafts', issued: 'Issued', good: 'Good output', scrap: 'Scrap', reusable: 'Reusable',
+    closedOnly: 'Rates use valid closed jobs only.',
+  },
+  balance: {
+    title: 'Live balance',
+    balanced: 'Balanced within tolerance',
+    unbalanced: 'Not balanced',
+    residualLine: 'Residual {{value}}',
+    tolerance: 'Tolerance ±{{value}}',
+    under: '{{value}} of issued material is not yet accounted for. Record it as good, reusable, rework or scrap.',
+    over: 'Outputs exceed issued material by {{value}}. Check issued weight and each output entry.',
+    insideTol: 'Residual of {{value}} is inside tolerance. It stays visible on the record.',
+    zeroIssued: 'Issued weight is zero. Drafts can be saved, but the job cannot be closed.',
+    equation: 'Issued = good + reusable + rework + scrap + residual',
+  },
+  dashboard: {
+    title: 'Loss overview',
+    subtitle: 'Where issued material went, by weight.',
+    period: 'Period',
+    outcomes: 'Material outcomes',
+    outcomesDesc: 'Share of issued weight across closed jobs.',
+    reasons: 'Scrap by reason',
+    reasonsDesc: 'Ranked by weight. Reusable material is excluded.',
+    noReasons: 'No scrap recorded in this period.',
+    attention: 'Needs attention',
+    attentionDesc: 'Closed jobs with active signals.',
+    noAttention: 'No jobs need attention in this period.',
+    recent: 'Recent jobs',
+    noRecent: 'No jobs in this period yet.',
+    allJobs: 'All jobs',
+    empty: 'No jobs recorded yet',
+    emptyDesc: 'Record the first job to see where material goes.',
+    error: 'Dashboard data could not be loaded.',
+    chartLabel: 'Bar chart of material outcomes',
+    reasonsChartLabel: 'Ranked bar chart of scrap by reason',
+  },
+  jobs: {
+    title: 'Jobs',
+    subtitle: 'Search, filter and open any job record.',
+    search: 'Search reference, product, material, machine',
+    machine: 'Machine', material: 'Material', product: 'Product', reference: 'Reference', status: 'Status',
+    allMachines: 'All machines', allMaterials: 'All materials',
+    created: 'Created', closedAt: 'Closed', results_one: '{{count}} job', results_other: '{{count}} jobs',
+    empty: 'No jobs yet', emptyDesc: 'Recorded jobs will appear here.',
+    noMatch: 'No jobs match these filters', noMatchDesc: 'Try a broader search or clear filters.',
+    error: 'Jobs could not be loaded.',
+    open: 'Open job {{ref}}',
+  },
+  form: {
+    newTitle: 'Record a job', newSubtitle: 'Enter every kilogram issued and where it went.',
+    editTitle: 'Edit draft', editSubtitle: 'Revision {{revision}}',
+    identity: 'Job identity', weights: 'Material weights', scrapTitle: 'Scrap entries', notesTitle: 'Notes',
+    reference: 'Reference', product: 'Product', material: 'Material', machine: 'Machine',
+    issued: 'Issued weight', good: 'Good output', reusable: 'Reusable material', rework: 'Rework',
+    notes: 'Operator notes', notesPh: 'Anything that explains this run',
+    suggestions: 'Suggestions shown; you can type any value.',
+    addScrap: 'Add scrap row', removeScrap: 'Remove scrap row {{n}}', reason: 'Reason', weight: 'Weight',
+    customPh: 'Describe the reason', scrapEmpty: 'No scrap recorded. Add a row for each scrap reason.',
+    saveDraft: 'Save draft', saveClose: 'Save and close', saving: 'Saving',
+    closeBlocked: 'Closing requires a balanced job with issued weight above zero and all identifiers filled.',
+    closeMissing: 'To close, fill in: {{fields}}. Drafts can be saved without them.',
+    created: 'Draft saved', updated: 'Draft updated', closed: 'Job closed',
+    errors: {
+      reference: 'Reference is required.',
+      number: 'Use digits with at most 3 decimals. Do not use commas.',
+      reason: 'Each scrap row needs a reason.',
+      weight: 'Each scrap row needs a weight above zero.',
+      fix: 'Fix the highlighted fields before saving.',
+    },
+    numHint: 'Arabic-Indic digits accepted. Max 3 decimals. Use a point or \u066B for decimals, no commas.',
+    closedNotice: 'This job is closed. Reopen it from the job page to edit.',
+    toJob: 'Go to job',
+    leave: 'Cancel',
+  },
+  detail: {
+    back: 'All jobs', created: 'Created {{date}}', closedOn: 'Closed {{date}}', revision: 'Revision {{n}}',
+    close: 'Close job', closeConfirm: 'Close this job?', closeDesc: 'Closed jobs feed dashboards, comparisons and baselines. You can reopen with a reason.',
+    reopen: 'Reopen', reopenTitle: 'Reopen job', reopenDesc: 'A reason is required and kept with the record.', reopenReason: 'Reason for reopening', reopened: 'Job reopened',
+    analysis: 'Analysis', breakdown: 'Weight breakdown', scrapReasons: 'Scrap reasons',
+    noScrap: 'No scrap recorded on this job.',
+    largestWeight: '{{weight}}, {{share}} of scrap',
+    notesOperator: 'Operator notes', noNotes: 'No operator notes.',
+    comparison: 'Comparison', comparisonDesc: 'Previous closed jobs on the same machine. Differences are context, not cause.',
+    compareWith: 'Compare with', noCandidates: 'No previous closed job on this machine to compare with.',
+    thisJob: 'This job', previousJob: 'Selected job', difference: 'Scrap rate difference',
+    diffHigher: '{{value}} percentage points higher than the selected job',
+    diffLower: '{{value}} percentage points lower than the selected job',
+    diffSame: 'Same scrap rate as the selected job',
+    contextTitle: 'Context differences',
+    contextSame: 'Same {{field}}',
+    contextDiff: '{{field}} differs',
+    issuedDiff: 'Issued weight differs by {{value}}',
+    contextNote: 'These differences may explain part of the gap. They are not proven causes.',
+    baseline: 'Machine baseline',
+    baselineDesc: 'Same machine, material and product, preceding {{days}} days.',
+    baselineInsufficient: 'Insufficient history: {{n}} comparable closed jobs, at least 5 needed. No broader cohort is used.',
+    baselineValue: 'Baseline scrap rate {{value}} across {{n}} jobs',
+    baselineDiff: 'This job is {{value}} percentage points {{dir}} baseline',
+    above: 'above', below: 'below',
+    compError: 'Comparison could not be loaded.',
+    insight: 'Insight summary', insightDesc: 'A written summary of this job against the selected comparison.',
+    generate: 'Generate summary', regenerate: 'Regenerate', generating: 'Generating',
+    sourceAi: 'AI-assisted, evidence-based summary. Figures come from validated metrics; the model only selects approved investigation prompts.',
+    sourceFallback: 'Evidence-based summary from validated metrics. AI prompt selection was unavailable, so default investigation prompts are shown.',
+    insightStale: 'The job, comparison or language changed. Generate a new summary.',
+    investigation: 'Investigation notes',
+    unverified: 'Unverified user evidence',
+    unverifiedDesc: 'Notes are recorded as submitted and are not checked against measurements.',
+    addNote: 'Add note', notePh: 'What did you observe or check?', noteAdded: 'Note added', noInvestigation: 'No investigation notes yet.',
+    notFound: 'Job not found', notFoundDesc: 'It may belong to another workspace or have been removed.',
+    error: 'This job could not be loaded.',
+    demoBadge: 'Synthetic',
+  },
+  settings: {
+    title: 'Settings', subtitle: 'Tolerance and threshold rules for this workspace.',
+    tolerance: 'Balance tolerance', toleranceHint: 'Maximum absolute residual, in kg, for a job to count as balanced. 0 to 10.',
+    threshold: 'High scrap threshold', thresholdHint: 'Scrap rate, in percent, that raises the high scrap signal. 0 to 100.',
+    baselineGap: 'Baseline gap', baselineGapHint: 'Percentage points above baseline that raise the above-baseline signal. Set by the system.',
+    saved: 'Settings saved', range: 'Value out of range.',
+    workspace: 'Workspace', workspaceDesc: 'Demo data is isolated to this browser. Private data is owned by your account.',
+    current: 'Current workspace',
+  },
+  errors: {
+    INVALID_INPUT: 'Some values are not valid. Check the form and try again.',
+    INVALID_WEIGHT: 'Weights must be zero or more, with at most 3 decimals.',
+    REQUIRED_FIELDS: 'Product, material, machine and reference are required to close a job.',
+    ZERO_ISSUED: 'Issued weight must be above zero to close a job.',
+    UNBALANCED: 'The job is not balanced. Resolve the residual before closing.',
+    DUPLICATE_REFERENCE: 'Another job already uses this reference.',
+    CLOSED_JOB: 'This job is closed and cannot be changed.',
+    STALE_REVISION: 'Someone changed this job since you opened it. Reload the latest version.',
+    NOT_FOUND: 'The record was not found.',
+    UNAUTHORIZED: 'Log in to continue in the private workspace.',
+    INVALID_COMPARISON: 'The selected comparison job is not valid for this job.',
+    NOTE_REQUIRED: 'Write a note before submitting.',
+    SERVER_ERROR: 'Something went wrong on the server. Try again.',
+    RATE_LIMIT: 'Too many requests. Wait a moment and try again.',
+    generic: 'Something went wrong.',
+  },
+  notFound: { title: 'Page not found', desc: 'This address does not match any page.', home: 'Go to dashboard' },
+};
+
+type Tree = { [k: string]: string | Tree };
+
+const ar: Tree = {
+  app: { name: 'ذكاء فاقد المواد', short: 'ذفم', tagline: 'احتسب كل كيلوغرام', skip: 'انتقل إلى المحتوى' },
+  nav: { dashboard: 'لوحة المتابعة', jobs: 'أوامر العمل', newJob: 'أمر جديد', settings: 'الإعدادات', menu: 'التنقل الرئيسي' },
+  lang: { switchTo: 'English', label: 'اللغة' },
+  workspace: {
+    demo: 'مساحة العرض التجريبي', private: 'مساحة خاصة',
+    synthetic: 'بيانات وتواريخ مُصطنعة لأغراض العرض فقط', syntheticShort: 'بيانات تجريبية مُصطنعة',
+    switchPrivate: 'استخدام المساحة الخاصة', switchDemo: 'استخدام مساحة العرض', login: 'تسجيل الدخول', logout: 'تسجيل الخروج',
+    loginNeeded: 'سجّل الدخول لاستخدام مساحة خاصة', signedInAs: 'مسجّل باسم {{name}}', notSignedIn: 'غير مسجّل الدخول',
+    switched: 'تم تبديل المساحة', switching: 'جارٍ تبديل المساحة', loading: 'جارٍ تحميل المساحة',
+    loadError: 'تعذّر تحميل مساحة العمل.', emptyPrivate: 'مساحتك الخاصة فارغة. سجّل أول أمر عمل للبدء.',
+    expired: 'انتهت جلستك. سجّل الدخول مجددًا أو تابع في مساحة العرض.',
+    loginLoses: 'تسجيل الدخول يعيد تحميل الصفحة. احفظ أي مسودة أولًا، فالتغييرات غير المحفوظة في هذه الصفحة ستُفقد.',
+  },
+  common: {
+    retry: 'إعادة المحاولة', cancel: 'إلغاء', save: 'حفظ', back: 'رجوع', edit: 'تعديل', close: 'إغلاق', view: 'عرض',
+    loading: 'جارٍ التحميل', kg: 'كغ', all: 'الكل', clear: 'مسح عوامل التصفية', from: 'من', to: 'إلى', apply: 'تطبيق',
+    none: 'لا يوجد', yes: 'نعم', no: 'لا', optional: 'اختياري', required: 'مطلوب', emptyValue: 'غير محدد',
+    textEquivalent: 'المكافئ النصي', reload: 'تحميل أحدث نسخة',
+  },
+  status: { draft: 'مسودة', closed: 'مغلق', all: 'كل الحالات' },
+  signals: {
+    high_scrap: 'خردة مرتفعة', above_baseline: 'أعلى من خط أساس الآلة', insufficient_history: 'سجل غير كافٍ',
+    high_scrap_desc: 'نسبة الخردة أعلى من حد المساحة البالغ {{value}}.',
+    above_baseline_desc: 'نسبة الخردة تتجاوز خط الأساس لهذه الآلة والمادة والمنتج.',
+    insufficient_history_desc: 'أقل من 5 أوامر مغلقة مماثلة خلال آخر 90 يومًا.',
+  },
+  outcome: {
+    good: 'إنتاج سليم', scrap: 'خردة', reusable: 'قابل لإعادة الاستخدام', rework: 'إعادة تشغيل', residual: 'المتبقي',
+    issued: 'المصروف', accounted: 'المحتسب', unaccounted: 'غير محتسب',
+    goodHint: 'منتج مطابق للمواصفات', scrapHint: 'مادة مفقودة لا تعود للعملية',
+    reusableHint: 'تعود إلى المخزون، ليست فاقدًا', reworkHint: 'تحتاج معالجة إضافية',
+  },
+  reasons: {
+    setup_layout: 'الإعداد والتخطيط', damaged: 'مادة تالفة', unspecified_demo: 'غير محدد (عرض قديم)',
+    custom: 'سبب مخصص', choose: 'اختر سببًا',
+  },
+  metrics: {
+    yield: 'المردود', scrapRate: 'نسبة الخردة', reusableRate: 'نسبة القابل لإعادة الاستخدام', reworkRate: 'نسبة إعادة التشغيل',
+    weightedYield: 'المردود المرجّح', weightedScrap: 'نسبة الخردة المرجّحة',
+    largest: 'أكبر سبب للخردة', contribution: '{{value}} من الخردة',
+    totalJobs: 'إجمالي الأوامر', drafts: '{{count}} مسودات', issued: 'المصروف', good: 'إنتاج سليم', scrap: 'خردة', reusable: 'قابل لإعادة الاستخدام',
+    closedOnly: 'النسب محسوبة من الأوامر المغلقة الصالحة فقط.',
+  },
+  balance: {
+    title: 'الميزان المباشر', balanced: 'متوازن ضمن السماحية', unbalanced: 'غير متوازن',
+    residualLine: 'المتبقي {{value}}', tolerance: 'السماحية ±{{value}}',
+    under: '{{value}} من المادة المصروفة لم تُحتسب بعد. سجّلها كإنتاج سليم أو قابل لإعادة الاستخدام أو إعادة تشغيل أو خردة.',
+    over: 'المخرجات تتجاوز المادة المصروفة بمقدار {{value}}. راجع الوزن المصروف وكل إدخال.',
+    insideTol: 'المتبقي {{value}} ضمن السماحية، ويبقى ظاهرًا في السجل.',
+    zeroIssued: 'الوزن المصروف صفر. يمكن حفظ المسودة لكن لا يمكن إغلاق الأمر.',
+    equation: 'المصروف = السليم + القابل لإعادة الاستخدام + إعادة التشغيل + الخردة + المتبقي',
+  },
+  dashboard: {
+    title: 'نظرة على الفاقد', subtitle: 'أين ذهبت المادة المصروفة، بالوزن.', period: 'الفترة',
+    outcomes: 'مآلات المادة', outcomesDesc: 'حصة الوزن المصروف في الأوامر المغلقة.',
+    reasons: 'الخردة حسب السبب', reasonsDesc: 'مرتبة حسب الوزن. المادة القابلة لإعادة الاستخدام مستبعدة.',
+    noReasons: 'لا خردة مسجلة في هذه الفترة.', attention: 'تحتاج إلى متابعة', attentionDesc: 'أوامر مغلقة عليها إشارات نشطة.',
+    noAttention: 'لا أوامر تحتاج متابعة في هذه الفترة.', recent: 'أحدث الأوامر', noRecent: 'لا أوامر في هذه الفترة بعد.',
+    allJobs: 'كل الأوامر', empty: 'لا أوامر مسجلة بعد', emptyDesc: 'سجّل أول أمر لترى أين تذهب المادة.',
+    error: 'تعذّر تحميل بيانات اللوحة.', chartLabel: 'مخطط أعمدة لمآلات المادة', reasonsChartLabel: 'مخطط أعمدة مرتب للخردة حسب السبب',
+  },
+  jobs: {
+    title: 'أوامر العمل', subtitle: 'ابحث وصفِّ وافتح أي سجل.',
+    search: 'ابحث بالمرجع أو المنتج أو المادة أو الآلة',
+    machine: 'الآلة', material: 'المادة', product: 'المنتج', reference: 'المرجع', status: 'الحالة',
+    allMachines: 'كل الآلات', allMaterials: 'كل المواد', created: 'أُنشئ', closedAt: 'أُغلق',
+    results_zero: 'لا أوامر', results_one: 'أمر واحد', results_two: 'أمران', results_few: '{{count}} أوامر', results_many: '{{count}} أمرًا', results_other: '{{count}} أمر',
+    empty: 'لا أوامر بعد', emptyDesc: 'ستظهر الأوامر المسجلة هنا.',
+    noMatch: 'لا أوامر تطابق عوامل التصفية', noMatchDesc: 'جرّب بحثًا أوسع أو امسح عوامل التصفية.',
+    error: 'تعذّر تحميل الأوامر.', open: 'فتح الأمر {{ref}}',
+  },
+  form: {
+    newTitle: 'تسجيل أمر عمل', newSubtitle: 'أدخل كل كيلوغرام مصروف وأين ذهب.',
+    editTitle: 'تعديل مسودة', editSubtitle: 'المراجعة {{revision}}',
+    identity: 'هوية الأمر', weights: 'أوزان المادة', scrapTitle: 'إدخالات الخردة', notesTitle: 'ملاحظات',
+    reference: 'المرجع', product: 'المنتج', material: 'المادة', machine: 'الآلة',
+    issued: 'الوزن المصروف', good: 'إنتاج سليم', reusable: 'مادة قابلة لإعادة الاستخدام', rework: 'إعادة تشغيل',
+    notes: 'ملاحظات المشغّل', notesPh: 'أي شيء يفسّر هذا التشغيل', suggestions: 'تظهر اقتراحات، ويمكنك كتابة أي قيمة.',
+    addScrap: 'إضافة سطر خردة', removeScrap: 'حذف سطر الخردة {{n}}', reason: 'السبب', weight: 'الوزن',
+    customPh: 'صف السبب', scrapEmpty: 'لا خردة مسجلة. أضف سطرًا لكل سبب خردة.',
+    saveDraft: 'حفظ كمسودة', saveClose: 'حفظ وإغلاق', saving: 'جارٍ الحفظ',
+    closeBlocked: 'الإغلاق يتطلب أمرًا متوازنًا بوزن مصروف أكبر من صفر وتعبئة كل المعرّفات.',
+    closeMissing: 'للإغلاق، املأ: {{fields}}. يمكن حفظ المسودة بدونها.',
+    created: 'تم حفظ المسودة', updated: 'تم تحديث المسودة', closed: 'تم إغلاق الأمر',
+    errors: {
+      reference: 'المرجع مطلوب.', number: 'استخدم أرقامًا بثلاث خانات عشرية كحد أقصى ودون فواصل.',
+      reason: 'كل سطر خردة يحتاج سببًا.', weight: 'كل سطر خردة يحتاج وزنًا أكبر من صفر.',
+      fix: 'صحّح الحقول المحددة قبل الحفظ.',
+    },
+    numHint: 'تُقبل الأرقام العربية الهندية. ثلاث خانات عشرية كحد أقصى. استخدم النقطة أو \u066B للكسور، دون فواصل.',
+    closedNotice: 'هذا الأمر مغلق. أعد فتحه من صفحة الأمر لتعديله.', toJob: 'الذهاب إلى الأمر', leave: 'إلغاء',
+  },
+  detail: {
+    back: 'كل الأوامر', created: 'أُنشئ {{date}}', closedOn: 'أُغلق {{date}}', revision: 'المراجعة {{n}}',
+    close: 'إغلاق الأمر', closeConfirm: 'إغلاق هذا الأمر؟', closeDesc: 'الأوامر المغلقة تغذي اللوحات والمقارنات وخطوط الأساس. يمكنك إعادة فتحها مع ذكر السبب.',
+    reopen: 'إعادة فتح', reopenTitle: 'إعادة فتح الأمر', reopenDesc: 'السبب مطلوب ويُحفظ مع السجل.', reopenReason: 'سبب إعادة الفتح', reopened: 'أُعيد فتح الأمر',
+    analysis: 'التحليل', breakdown: 'تفصيل الأوزان', scrapReasons: 'أسباب الخردة', noScrap: 'لا خردة مسجلة في هذا الأمر.',
+    largestWeight: '{{weight}}، {{share}} من الخردة', notesOperator: 'ملاحظات المشغّل', noNotes: 'لا ملاحظات من المشغّل.',
+    comparison: 'المقارنة', comparisonDesc: 'أوامر مغلقة سابقة على الآلة نفسها. الفروق سياق وليست سببًا.',
+    compareWith: 'المقارنة مع', noCandidates: 'لا يوجد أمر مغلق سابق على هذه الآلة للمقارنة.',
+    thisJob: 'هذا الأمر', previousJob: 'الأمر المختار', difference: 'فرق نسبة الخردة',
+    diffHigher: 'أعلى بـ {{value}} نقطة مئوية من الأمر المختار', diffLower: 'أقل بـ {{value}} نقطة مئوية من الأمر المختار', diffSame: 'نسبة الخردة مطابقة للأمر المختار',
+    contextTitle: 'فروق السياق', contextSame: '{{field}} متطابق', contextDiff: '{{field}} مختلف', issuedDiff: 'الوزن المصروف يختلف بمقدار {{value}}',
+    contextNote: 'قد تفسّر هذه الفروق جزءًا من الفجوة، لكنها ليست أسبابًا مثبتة.',
+    baseline: 'خط أساس الآلة', baselineDesc: 'الآلة والمادة والمنتج نفسها، خلال {{days}} يومًا السابقة.',
+    baselineInsufficient: 'سجل غير كافٍ: {{n}} أوامر مغلقة مماثلة، والحد الأدنى 5. لا تُستخدم مجموعة أوسع.',
+    baselineValue: 'نسبة خردة خط الأساس {{value}} عبر {{n}} أوامر', baselineDiff: 'هذا الأمر {{dir}} خط الأساس بـ {{value}} نقطة مئوية',
+    above: 'أعلى من', below: 'أدنى من', compError: 'تعذّر تحميل المقارنة.',
+    insight: 'ملخص تحليلي', insightDesc: 'ملخص مكتوب لهذا الأمر مقارنة بالأمر المختار.',
+    generate: 'إنشاء الملخص', regenerate: 'إعادة الإنشاء', generating: 'جارٍ الإنشاء',
+    sourceAi: 'ملخص مدعوم بالذكاء الاصطناعي ومبني على الأدلة. الأرقام مأخوذة من مقاييس موثّقة، والنموذج يختار فقط أسئلة تحقيق معتمدة.',
+    sourceFallback: 'ملخص مبني على الأدلة من مقاييس موثّقة. اختيار الأسئلة بالذكاء الاصطناعي غير متاح، لذا تُعرض أسئلة التحقيق الافتراضية.',
+    insightStale: 'تغيّر الأمر أو المقارنة أو اللغة. أنشئ ملخصًا جديدًا.',
+    investigation: 'ملاحظات التحقيق', unverified: 'دليل مستخدم غير موثّق', unverifiedDesc: 'تُسجَّل الملاحظات كما أُدخلت ولا تُطابق مع القياسات.',
+    addNote: 'إضافة ملاحظة', notePh: 'ماذا لاحظت أو فحصت؟', noteAdded: 'تمت إضافة الملاحظة', noInvestigation: 'لا ملاحظات تحقيق بعد.',
+    notFound: 'الأمر غير موجود', notFoundDesc: 'ربما يتبع مساحة عمل أخرى أو تمت إزالته.', error: 'تعذّر تحميل هذا الأمر.', demoBadge: 'مُصطنع',
+  },
+  settings: {
+    title: 'الإعدادات', subtitle: 'قواعد السماحية والحدود لهذه المساحة.',
+    tolerance: 'سماحية الميزان', toleranceHint: 'أقصى قيمة مطلقة للمتبقي بالكيلوغرام ليُعد الأمر متوازنًا. من 0 إلى 10.',
+    threshold: 'حد الخردة المرتفعة', thresholdHint: 'نسبة الخردة المئوية التي تُطلق إشارة الخردة المرتفعة. من 0 إلى 100.',
+    baselineGap: 'فجوة خط الأساس', baselineGapHint: 'النقاط المئوية فوق خط الأساس التي تُطلق إشارة التجاوز. يحددها النظام.',
+    saved: 'تم حفظ الإعدادات', range: 'القيمة خارج النطاق.',
+    workspace: 'مساحة العمل', workspaceDesc: 'بيانات العرض معزولة لهذا المتصفح. البيانات الخاصة مملوكة لحسابك.', current: 'المساحة الحالية',
+  },
+  errors: {
+    INVALID_INPUT: 'بعض القيم غير صالحة. راجع النموذج وحاول مجددًا.',
+    INVALID_WEIGHT: 'يجب أن تكون الأوزان صفرًا أو أكثر بثلاث خانات عشرية كحد أقصى.',
+    REQUIRED_FIELDS: 'المنتج والمادة والآلة والمرجع مطلوبة لإغلاق الأمر.',
+    ZERO_ISSUED: 'يجب أن يكون الوزن المصروف أكبر من صفر لإغلاق الأمر.',
+    UNBALANCED: 'الأمر غير متوازن. عالج المتبقي قبل الإغلاق.',
+    DUPLICATE_REFERENCE: 'يوجد أمر آخر يستخدم هذا المرجع.',
+    CLOSED_JOB: 'هذا الأمر مغلق ولا يمكن تغييره.',
+    STALE_REVISION: 'تغيّر هذا الأمر منذ فتحته. حمّل أحدث نسخة.',
+    NOT_FOUND: 'السجل غير موجود.',
+    UNAUTHORIZED: 'سجّل الدخول للمتابعة في المساحة الخاصة.',
+    INVALID_COMPARISON: 'الأمر المختار للمقارنة غير صالح لهذا الأمر.',
+    NOTE_REQUIRED: 'اكتب ملاحظة قبل الإرسال.',
+    SERVER_ERROR: 'حدث خطأ في الخادم. حاول مجددًا.',
+    RATE_LIMIT: 'طلبات كثيرة جدًا. انتظر قليلًا ثم حاول مجددًا.',
+    generic: 'حدث خطأ ما.',
+  },
+  notFound: { title: 'الصفحة غير موجودة', desc: 'هذا العنوان لا يطابق أي صفحة.', home: 'الذهاب إلى اللوحة' },
+};
+
+export const LANG_KEY = 'mli.lang';
+type Lang = 'en' | 'ar';
+const asLang = (v: string | null | undefined): Lang | null => {
+  const p = (v ?? '').toLowerCase().split('-')[0];
+  return p === 'ar' || p === 'en' ? p : null;
+};
+function detectInitial(): Lang {
+  const fromUrl = asLang(new URLSearchParams(window.location.search).get('lang'));
+  if (fromUrl) return fromUrl;
+  const stored = asLang(window.localStorage.getItem(LANG_KEY));
+  if (stored) return stored;
+  for (const l of navigator.languages ?? [navigator.language]) {
+    const m = asLang(l);
+    if (m) return m;
+  }
+  return 'en';
+}
+const initial = detectInitial();
+window.localStorage.setItem(LANG_KEY, initial);
+
+function applyDocument(lng: string) {
+  document.documentElement.lang = lng;
+  document.documentElement.dir = lng === 'ar' ? 'rtl' : 'ltr';
+}
+
+void i18n.use(initReactI18next).init({
+  resources: { en: { translation: en }, ar: { translation: ar } },
+  lng: initial,
+  fallbackLng: 'en',
+  interpolation: { escapeValue: false },
+});
+applyDocument(initial);
+i18n.on('languageChanged', (lng) => {
+  applyDocument(lng);
+  window.localStorage.setItem(LANG_KEY, lng);
+  // Keep a ?lang= preview param in sync so reload honors the current choice.
+  const url = new URL(window.location.href);
+  if (url.searchParams.has('lang')) {
+    url.searchParams.set('lang', lng);
+    window.history.replaceState(window.history.state, '', url.toString());
+  }
+});
+
+export default i18n;

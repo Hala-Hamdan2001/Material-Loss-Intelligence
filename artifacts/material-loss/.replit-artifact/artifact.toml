@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Material Loss Intelligence"
+description = "Bilingual material accounting and investigation for manufacturing jobs."
+version = "1.0.0"
+id = "artifacts/material-loss"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18160
+
+[services.development]
+run = "pnpm --filter @workspace/material-loss run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/material-loss", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/material-loss/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18160"
+BASE_PATH = "/"

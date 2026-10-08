@@ -1,0 +1,7 @@
+{
+  "name": "@workspace/material-accounting",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": { ".": { "types": "./dist/index.d.ts", "default": "./src/index.ts" } },
+  "scripts": { "test": "node --experimental-strip-types --test src/accounting.test.ts" }
+}

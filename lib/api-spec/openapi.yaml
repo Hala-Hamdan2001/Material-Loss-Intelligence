@@ -1,36 +1,1515 @@
-openapi: 3.1.0
-info:
-  # Do not change the title, if the title changes, the import paths will be broken
-  title: Api
-  version: 0.1.0
-  description: API specification
-servers:
-  - url: /api
-    description: Base API path
-tags:
-  - name: health
-    description: Health operations
-paths:
-  /healthz:
-    get:
-      operationId: healthCheck
-      tags: [health]
-      summary: Health check
-      description: Returns server health status
-      responses:
-        "200":
-          description: Healthy
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/HealthStatus"
-components:
-  schemas:
-    HealthStatus:
-      type: object
-      properties:
-        status:
-          type: string
-      required:
-        - status
-
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Api",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/api"
+    }
+  ],
+  "paths": {
+    "/healthz": {
+      "get": {
+        "operationId": "healthCheck",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workspace": {
+      "get": {
+        "operationId": "getWorkspace",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Workspace"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "switchWorkspace",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Workspace"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkspaceInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workspace/settings": {
+      "patch": {
+        "operationId": "updateSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Workspace"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettingsInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reference-data": {
+      "get": {
+        "operationId": "getReferenceData",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceData"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dashboard": {
+      "get": {
+        "operationId": "getDashboard",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Dashboard"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs": {
+      "get": {
+        "operationId": "listJobs",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "machine",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "material",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Job"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createJob",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/{id}": {
+      "get": {
+        "operationId": "getJob",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateJob",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobUpdate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/{id}/close": {
+      "post": {
+        "operationId": "closeJob",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevisionInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/{id}/reopen": {
+      "post": {
+        "operationId": "reopenJob",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReopenInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/{id}/notes": {
+      "post": {
+        "operationId": "addInvestigationNote",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoteInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/{id}/comparison": {
+      "get": {
+        "operationId": "getComparison",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "comparisonId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comparison"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/{id}/insights": {
+      "post": {
+        "operationId": "generateInsight",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Insight"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InsightInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/user": {
+      "get": {
+        "operationId": "getCurrentAuthUser",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthUserEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "get": {
+        "operationId": "beginBrowserLogin",
+        "parameters": [
+          {
+            "name": "returnTo",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/callback": {
+      "get": {
+        "operationId": "handleBrowserLoginCallback",
+        "parameters": [],
+        "responses": {
+          "302": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/logout": {
+      "get": {
+        "operationId": "logoutBrowserSession",
+        "parameters": [
+          {
+            "name": "returnTo",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mobile-auth/token-exchange": {
+      "post": {
+        "operationId": "exchangeMobileAuthorizationCode",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MobileTokenExchangeSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MobileTokenExchangeRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mobile-auth/logout": {
+      "post": {
+        "operationId": "logoutMobileSession",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogoutSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HealthStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "ScrapEntry": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100000000
+          }
+        },
+        "required": [
+          "reason",
+          "weight"
+        ]
+      },
+      "JobInput": {
+        "type": "object",
+        "properties": {
+          "reference": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "product": {
+            "type": "string"
+          },
+          "material": {
+            "type": "string"
+          },
+          "machine": {
+            "type": "string"
+          },
+          "issued": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100000000
+          },
+          "good": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100000000
+          },
+          "reusable": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100000000
+          },
+          "rework": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100000000
+          },
+          "scrapEntries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScrapEntry"
+            }
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reference",
+          "product",
+          "material",
+          "machine",
+          "issued",
+          "good",
+          "reusable",
+          "rework",
+          "scrapEntries",
+          "notes"
+        ]
+      },
+      "Metrics": {
+        "type": "object",
+        "properties": {
+          "scrap": {
+            "type": "number"
+          },
+          "accounted": {
+            "type": "number"
+          },
+          "residual": {
+            "type": "number"
+          },
+          "yieldPercent": {
+            "type": "number"
+          },
+          "scrapPercent": {
+            "type": "number"
+          },
+          "reusablePercent": {
+            "type": "number"
+          },
+          "reworkPercent": {
+            "type": "number"
+          },
+          "balanced": {
+            "type": "boolean"
+          },
+          "largestReason": {
+            "type": "string"
+          },
+          "largestWeight": {
+            "type": "number"
+          },
+          "largestContribution": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "scrap",
+          "accounted",
+          "residual",
+          "yieldPercent",
+          "scrapPercent",
+          "reusablePercent",
+          "reworkPercent",
+          "balanced",
+          "largestReason",
+          "largestWeight",
+          "largestContribution"
+        ]
+      },
+      "InvestigationNote": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "text",
+          "createdAt"
+        ]
+      },
+      "RevisionInput": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "revision"
+        ]
+      },
+      "ReopenInput": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "revision",
+          "reason"
+        ]
+      },
+      "NoteInput": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          }
+        },
+        "required": [
+          "text"
+        ]
+      },
+      "InsightInput": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "enum": [
+              "en",
+              "ar"
+            ]
+          },
+          "comparisonId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "language",
+          "comparisonId"
+        ]
+      },
+      "Insight": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "ai",
+              "fallback"
+            ]
+          },
+          "language": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "text",
+          "source",
+          "language",
+          "revision"
+        ]
+      },
+      "Baseline": {
+        "type": "object",
+        "properties": {
+          "sufficient": {
+            "type": "boolean"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "scrapPercent": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "difference": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "days": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sufficient",
+          "count",
+          "scrapPercent",
+          "difference",
+          "days"
+        ]
+      },
+      "Comparison": {
+        "type": "object",
+        "properties": {
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Job"
+            }
+          },
+          "selected": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Job"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "difference": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "baseline": {
+            "$ref": "#/components/schemas/Baseline"
+          }
+        },
+        "required": [
+          "candidates",
+          "selected",
+          "difference",
+          "baseline"
+        ]
+      },
+      "ReasonTotal": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "number"
+          },
+          "contribution": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "reason",
+          "weight",
+          "contribution"
+        ]
+      },
+      "Workspace": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "isDemo": {
+            "type": "boolean"
+          },
+          "tolerance": {
+            "type": "number"
+          },
+          "highScrapThreshold": {
+            "type": "number"
+          },
+          "baselineGap": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "isDemo",
+          "tolerance",
+          "highScrapThreshold",
+          "baselineGap"
+        ]
+      },
+      "WorkspaceInput": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "demo",
+              "private"
+            ]
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "SettingsInput": {
+        "type": "object",
+        "properties": {
+          "tolerance": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "highScrapThreshold": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "tolerance",
+          "highScrapThreshold"
+        ]
+      },
+      "ReferenceData": {
+        "type": "object",
+        "properties": {
+          "machines": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "materials": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scrapReasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "machines",
+          "materials",
+          "products",
+          "scrapReasons"
+        ]
+      },
+      "ErrorEnvelope": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "AuthUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "firstName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lastName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "profileImageUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "firstName",
+          "lastName",
+          "profileImageUrl"
+        ]
+      },
+      "AuthUserEnvelope": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthUser"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "user"
+        ]
+      },
+      "MobileTokenExchangeRequest": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "code_verifier": {
+            "type": "string"
+          },
+          "redirect_uri": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "nonce": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "code_verifier",
+          "redirect_uri",
+          "state"
+        ]
+      },
+      "MobileTokenExchangeSuccess": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "LogoutSuccess": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "JobUpdate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/JobInput"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "revision": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "revision"
+            ]
+          }
+        ]
+      },
+      "Job": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/JobInput"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "closed"
+                ]
+              },
+              "revision": {
+                "type": "integer"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "closedAt": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "isDemo": {
+                "type": "boolean"
+              },
+              "tolerance": {
+                "type": "number"
+              },
+              "metrics": {
+                "$ref": "#/components/schemas/Metrics"
+              },
+              "signals": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "high_scrap",
+                    "above_baseline",
+                    "insufficient_history"
+                  ]
+                }
+              },
+              "investigationNotes": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/InvestigationNote"
+                }
+              }
+            },
+            "required": [
+              "id",
+              "status",
+              "revision",
+              "createdAt",
+              "closedAt",
+              "isDemo",
+              "tolerance",
+              "metrics",
+              "signals",
+              "investigationNotes"
+            ]
+          }
+        ]
+      },
+      "Dashboard": {
+        "type": "object",
+        "properties": {
+          "totalJobs": {
+            "type": "integer"
+          },
+          "draftCount": {
+            "type": "integer"
+          },
+          "issued": {
+            "type": "number"
+          },
+          "good": {
+            "type": "number"
+          },
+          "scrap": {
+            "type": "number"
+          },
+          "reusable": {
+            "type": "number"
+          },
+          "rework": {
+            "type": "number"
+          },
+          "yieldPercent": {
+            "type": "number"
+          },
+          "scrapPercent": {
+            "type": "number"
+          },
+          "recentJobs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Job"
+            }
+          },
+          "attentionJobs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Job"
+            }
+          },
+          "scrapReasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReasonTotal"
+            }
+          }
+        },
+        "required": [
+          "totalJobs",
+          "draftCount",
+          "issued",
+          "good",
+          "scrap",
+          "reusable",
+          "rework",
+          "yieldPercent",
+          "scrapPercent",
+          "recentJobs",
+          "attentionJobs",
+          "scrapReasons"
+        ]
+      }
+    }
+  }
+}

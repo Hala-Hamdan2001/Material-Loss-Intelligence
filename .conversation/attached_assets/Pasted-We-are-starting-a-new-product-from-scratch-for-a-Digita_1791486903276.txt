@@ -1,0 +1,374 @@
+We are starting a new product from scratch for a Digital HERizon challenge.
+
+IMPORTANT: DO NOT BUILD OR MODIFY ANYTHING YET.
+This request is PLAN MODE ONLY. I want a clear implementation/product plan first.
+
+## 1. Business context
+
+A real printing and publishing company in Palestine, Ibn Khaldoun Printing and Publishing, gave us a real production problem.
+
+In a cutting job, the factory may issue a large amount of board/paper material, but management needs to know exactly where that material went and distinguish true waste from reusable leftover pieces.
+
+Example:
+
+Job IK-202 on cutting machine CT-2:
+
+* 1,200 kg board issued
+* 900 kg good cut product
+* 180 kg setup/layout scrap
+* 60 kg damaged scrap
+* 60 kg reusable offcuts
+
+Therefore:
+
+* Total scrap = 240 kg = 20%
+* Good yield = 900 / 1,200 = 75%
+* Reusable offcuts = 60 kg = 5%
+* Total = 100%
+
+Comparison job IK-203 on the same machine:
+
+* 1,000 kg issued
+* 820 kg good product
+* 100 kg scrap
+* 80 kg reusable offcuts
+* Scrap rate = 10%
+
+So IK-202 has a scrap rate 10 percentage points higher than IK-203.
+
+The largest scrap category in IK-202 is setup/layout scrap at 180 kg.
+
+The original challenge asks for a digital job card where the operator records:
+
+* material
+* machine
+* issued material
+* good output
+* scrap by reason
+* reusable offcuts
+* rework separately if relevant
+
+The application should validate that the quantities balance back to the issued material, calculate yield/scrap, and allow comparison between jobs.
+
+## 2. Important product-thinking requirement
+
+Do NOT design this as a one-off application only for Ibn Khaldoun.
+
+The Ibn Khaldoun case is our pilot use case.
+
+We want to turn the underlying problem into a marketable product for other material-intensive manufacturing businesses such as:
+
+* carton producers
+* commercial printers
+* label producers
+* packaging/converting companies
+* paper converters
+* other factories where material enters a production job and leaves as good output, scrap, reusable leftovers, rework, or other categorized outcomes
+
+The product concept is:
+
+### Material Loss Intelligence
+
+Core promise:
+"Make every production job explain where its material went, distinguish true scrap from reusable material, and help managers identify unusual or avoidable material losses."
+
+This should NOT try to become a full ERP.
+It should NOT try to replace a cutting-optimization engine.
+It should NOT depend on complex machine integrations for the MVP.
+
+The product should focus on job-level material visibility, validation, comparison, and actionable loss insights.
+
+## 3. Product direction
+
+Think in this flow:
+
+Material In
+→ Production Job
+→ Good Output
+→ Scrap by reason
+→ Reusable Offcuts
+→ Rework / Other
+→ Balance validation
+→ Yield + Scrap metrics
+→ Comparison / baseline
+→ Loss insights
+→ Investigation support
+
+The core value is not just recording numbers.
+The value is helping a supervisor or manager understand:
+
+* Where did the material go?
+* What is the true scrap?
+* Which loss category is largest?
+* Is this job abnormal compared with comparable jobs?
+* What should be investigated?
+
+## 4. AI role
+
+AI should be an assistant layer, not the foundation of the calculation.
+
+The deterministic application must calculate:
+
+* totals
+* balance
+* yield
+* scrap rate
+* reusable percentage
+* comparisons
+
+AI may then summarize the evidence in plain language.
+
+Example acceptable AI output:
+"IK-202 recorded 20% scrap compared with 10% for IK-203 on the same machine. Setup/layout scrap accounts for 180 kg of the 240 kg total scrap and is the largest recorded loss category. Further investigation is recommended."
+
+AI must NOT invent a root cause.
+
+For example, it must NOT say:
+"The machine was incorrectly configured"
+unless the user explicitly entered evidence supporting that claim.
+
+AI should only interpret recorded data and operator/supervisor notes.
+
+## 5. Target users
+
+Primary users:
+
+1. Operator
+
+* records the production job and actual material outcomes
+
+2. Production Supervisor
+
+* reviews jobs
+* checks abnormal losses
+* compares jobs
+* investigates reasons
+
+3. Manager / Owner
+
+* sees overall material efficiency
+* identifies major loss categories
+* sees trends and unusual jobs
+* wants the business impact of losses to be understandable
+
+The MVP does not need complex permissions/authentication unless you believe there is a very simple architecture that supports it without slowing development.
+
+## 6. MVP requirements
+
+The first version should be intentionally focused and realistically buildable quickly.
+
+Core features expected:
+
+### A. Dashboard
+
+Show:
+
+* total jobs
+* total material issued
+* total good output
+* total true scrap
+* total reusable offcuts
+* average yield
+* average scrap rate
+* recent / notable jobs
+* a simple indication of abnormal or high-loss jobs
+
+### B. Create / close a production job
+
+Fields should support:
+
+* Job ID
+* Product
+* Material
+* Machine
+* Issued material weight
+* Good output weight
+* Scrap by reason
+* Reusable offcuts
+* Rework if included in the model
+* Operator/supervisor notes if useful
+
+Do not force unnecessary fields.
+
+### C. Balance validation
+
+The system must verify:
+
+Issued Material =
+Good Output
+
+* Scrap
+* Reusable Offcuts
+* Rework / Other (only if included)
+
+A job must not be considered valid/closed if the numbers do not balance within a clearly defined tolerance.
+
+The UI should explain the imbalance clearly instead of just showing "error".
+
+### D. Job analysis
+
+For each job show:
+
+* issued
+* good output
+* true scrap
+* reusable
+* yield %
+* scrap %
+* breakdown of scrap reasons
+* largest loss category
+* any comparison result available
+
+### E. Comparison
+
+The system should compare a job against relevant previous jobs.
+
+At minimum, support comparison by:
+
+* same machine
+* and ideally same/similar material or product when enough data exists
+
+If there is insufficient historical data, the UI should say so rather than creating a misleading comparison.
+
+### F. Investigation insight
+
+For jobs with unusually high scrap, surface:
+
+* the main loss category
+* how much it contributed
+* comparison to baseline/comparable jobs
+* a suggested investigation area
+
+This should be framed as investigation guidance, NOT diagnosis.
+
+### G. AI summary
+
+A simple button such as "Analyze Job" or "Generate Insight" can produce a concise evidence-based summary.
+
+Do not overbuild AI.
+
+## 7. Productization / future direction
+
+Design the data model so the product can later support multiple factories, machines, materials, products, and jobs.
+
+Future capabilities may include:
+
+* material cost and estimated financial loss
+* trends over time
+* machine performance comparisons
+* material/product benchmarks
+* alerts for abnormal jobs
+* reusable-offcut inventory tracking
+* import from Excel/CSV
+* integrations with ERP/MES systems
+* role-based access
+* multi-company / multi-site support
+* smarter recommendations based on historical patterns
+
+Do NOT build these future capabilities in the MVP unless they are trivial and directly useful.
+
+## 8. UX requirements
+
+The product should feel like a real modern B2B manufacturing product, not a school project.
+
+Requirements:
+
+* simple
+* professional
+* easy for a factory employee to understand
+* minimal data entry friction
+* clear distinction between Good Output, Scrap, and Reusable Offcuts
+* visual hierarchy around the most important loss indicators
+* responsive on desktop/tablet/mobile
+* avoid unnecessary animations or decorative complexity
+
+The terminology must remain explicit:
+
+* Scrap = material treated as waste
+* Reusable Offcuts = leftover material that can be reused
+* Yield = good output divided by material issued
+
+Do not visually or mathematically mix reusable offcuts with true scrap.
+
+## 9. Demo scenario
+
+The MVP should be able to demonstrate the original case convincingly.
+
+Seed/demo data may include:
+
+* IK-202
+* IK-203
+* CT-2
+* realistic material/product values
+
+The demo should make it easy to show:
+
+1. entering or opening a job
+2. validating that the material balances
+3. seeing 75% yield and 20% scrap for IK-202
+4. seeing reusable 60 kg excluded from scrap
+5. comparing IK-202 with IK-203
+6. identifying setup/layout scrap as the largest loss category
+7. showing an evidence-based AI summary
+
+## 10. Technical planning
+
+For the plan, propose:
+
+* recommended tech stack
+* frontend/backend structure
+* database choice
+* main entities/tables and their relationships
+* calculation/validation logic
+* API structure if applicable
+* AI integration approach
+* how demo data will work
+* how to keep the architecture easy to expand later
+
+Prefer the simplest reliable architecture that Replit can build and maintain quickly.
+
+Do not introduce a large framework or infrastructure unless necessary.
+
+## 11. Market-aware constraints
+
+There are already ERP, manufacturing-management, and cutting-optimization products in the market.
+
+Therefore, the product should differentiate around:
+
+* focused material-loss visibility
+* fast deployment
+* job-level accountability
+* true scrap vs reusable separation
+* practical comparison and investigation insights
+* usefulness without requiring a full ERP implementation
+
+Do not claim that this idea is unique.
+The goal is a focused, useful product with a clear value proposition.
+
+## 12. What I want from Plan Mode
+
+Return a structured plan covering:
+
+1. Recommended MVP scope
+2. What should NOT be built now
+3. Suggested user flow
+4. Main screens/pages
+5. Data model
+6. Core calculations and validation rules
+7. Comparison/baseline logic
+8. AI approach and guardrails
+9. Recommended architecture/stack
+10. Development phases in the best order
+11. Seed/demo data strategy
+12. Testing strategy for the critical calculations and workflow
+13. Main risks or ambiguities you see
+14. A short explanation of why this MVP could later become a broader SaaS product for multiple factories
+
+Very important:
+
+* Do not write the application yet.
+* Do not modify files.
+* Do not over-engineer the solution.
+* Do not add features just to make the demo look bigger.
+* Prioritize a strong, believable MVP that can be built and demonstrated quickly.
+* Only ask me questions if there is a true blocker; otherwise make reasonable assumptions and state them.

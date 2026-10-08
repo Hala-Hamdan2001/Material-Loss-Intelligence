@@ -1,0 +1,2 @@
+- [Accounting and insight boundaries](accounting-boundaries.md) — keep rework/offcuts separate and AI claims evidence-locked.
+- [Code generation compatibility](codegen-compatibility.md) — Orval path/query name collisions and iterable DOM typings.

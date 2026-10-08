@@ -3,6 +3,8 @@
   "compileOnSave": false,
   "files": [],
   "references": [
+    { "path": "./lib/material-accounting" },
+    { "path": "./lib/replit-auth-web" },
     {
       "path": "./lib/db"
     },
