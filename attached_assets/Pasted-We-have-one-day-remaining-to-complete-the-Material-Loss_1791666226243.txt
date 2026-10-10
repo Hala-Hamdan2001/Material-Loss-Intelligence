@@ -1,0 +1,80 @@
+We have one day remaining to complete the Material Loss Intelligence MVP. Implement the existing queued **Project Management Board** and **Manager-only CSV Data Export** with minimal, targeted changes.
+
+The current application is working. Authentication and Manager/Worker permission logic have been audited; the real login → logout → login-again flow has now been manually verified for the Manager account. Real Worker login is still unverified.
+
+## Critical: preserve the existing application
+
+* Inspect the current source code and existing implementation before editing.
+* Preserve the current architecture, database, records, Demo and Private workspace separation, existing routes, accounting rules, dashboard charts, sidebar, visual identity, and responsive layout.
+* Keep Arabic/English, RTL/LTR, and existing functionality working.
+* Do not restore Presentation Mode or add mock users, simulated roles, or fake data to the actual application.
+* Do not rewrite working features or perform destructive database operations.
+* Reuse existing job statuses, investigation logic, workspace authorization, and UI components wherever possible.
+* Do not change authentication or database schema unless a concrete blocker makes it necessary. If a schema migration is unavoidable, explain it before proceeding.
+
+## Feature 1 — Project Management Board
+
+Implement a real, workspace-scoped workflow board using existing job records.
+
+Create three clear columns:
+
+1. **Jobs** — open/in-progress jobs that do not currently require investigation.
+2. **Need Investigation** — jobs explicitly flagged for investigation or already represented by the existing investigation workflow.
+3. **Closed** — jobs successfully closed under the existing accounting and authorization rules.
+
+Requirements:
+
+* Every card must link to the real job details page.
+* Display useful existing fields, such as job number, material, machine, scrap rate, and current status, where available.
+* Do not invent missing data or classify jobs as needing investigation solely because a value is unknown.
+* Keep the existing accounting equation and closure validation unchanged.
+* Managers may use the management workflow and existing permitted investigation/closure actions.
+* Workers must not gain new permissions. They must only see and perform actions permitted by the existing server-side rules.
+* Enforce permissions and workspace isolation on the server; hiding controls is not sufficient.
+* If moving cards between columns requires a status change, use the existing authorized API and lifecycle rules. Do not introduce a separate client-only status.
+* Make the board responsive on mobile and usable in Arabic RTL.
+* Include sensible empty states.
+
+## Feature 2 — Manager-only CSV Export
+
+Add an obvious export action for Managers in the relevant jobs or reporting interface.
+
+Requirements:
+
+* Export real data only from the current authorized workspace.
+* Respect the currently selected date range and job filters where applicable; make it clear whether the export includes filtered results or all workspace jobs.
+* Include useful job-level fields already available, such as job number, date, material, machine, issued quantity, good output, scrap quantity, scrap reasons, reusable offcuts, rework if supported, yield, scrap rate, status, and closure date.
+* Use correct values from the server/database and existing accounting calculations. Do not recompute with conflicting formulas or fabricate missing values.
+* Use valid CSV escaping for commas, quotation marks, and newlines.
+* Make the CSV usable in Excel, including correct Arabic text encoding.
+* Prevent spreadsheet formula injection in untrusted text fields.
+* Enforce Manager authorization and workspace membership on the export endpoint itself. A Worker must not be able to obtain the export by directly calling the endpoint.
+* Do not include credentials, session data, or unrelated personal information.
+
+## Testing and regression safety
+
+After implementation:
+
+1. Run the existing accounting, permission, and regression tests.
+2. Add focused tests for board status mapping, workspace isolation, CSV contents/encoding, active filters, and Manager-only export.
+3. Verify that a Worker receives a server-side denial for the export endpoint and cannot perform unauthorized lifecycle transitions through the board.
+4. Verify that job closure still rejects unbalanced material quantities.
+5. Run TypeScript checks and production builds.
+6. Check the actual Demo records, including IK-202 and IK-203, without modifying them.
+7. Check Arabic RTL and a narrow mobile viewport.
+8. Preserve existing records and workspace separation. Do not claim real Worker login was tested unless it actually was.
+
+If both features cannot be safely completed in one pass, prioritize a correct working board and a secure CSV export over decorative refinements. Do not spend time on unrelated redesigns.
+
+## Final report
+
+Report:
+
+* What was implemented and where it appears.
+* How the board derives each column from real existing job state.
+* CSV fields, filtering behavior, and Arabic/Excel compatibility.
+* Tests actually run and their results.
+* Any unfinished items or blockers.
+* Confirmation that existing records and authentication behavior were preserved.
+
+Make the changes directly in the existing project. Do not stop after producing a plan; implement and verify the features within the stated scope.

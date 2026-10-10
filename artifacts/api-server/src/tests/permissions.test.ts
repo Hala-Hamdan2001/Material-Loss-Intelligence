@@ -125,7 +125,7 @@ try {
   await outsider.call("/workspace/members","POST",{userId:ids[2],role:"manager",active:true},403);
   outsider.cookies.set("mli_workspace",other.id);
   verify("cross-workspace lifecycle, investigations, assignment and forged workspace cookies denied",()=>{});
-  for (const path of ["/dashboard",`/jobs/${workerJob.id}/comparison`,"/workspace/members"]) await worker.call(path,"GET",undefined,403);
+  for (const path of ["/dashboard","/jobs/board","/jobs/export.csv",`/jobs/${workerJob.id}/comparison`,"/workspace/members"]) await worker.call(path,"GET",undefined,403);
   for (const [path,data] of [
     ["/workspace/settings",{tolerance:1,highScrapThreshold:20}],
     [`/jobs/${workerJob.id}/close`,{revision:workerJob.revision}],
@@ -156,6 +156,23 @@ try {
   const closed = await manager.call(`/jobs/${workerJob.id}/close`,"POST",{revision:workerJob.revision});
   await worker.call(`/jobs/${workerJob.id}`,"PATCH",{...input,revision:closed.revision},409);
   const dash = await manager.call("/dashboard");
+  const board = await manager.call("/jobs/board");
+  assert.equal(board.closed.length,1);
+  assert.equal(board.investigation.length,1);
+  assert.ok([...board.closed,...board.investigation,...board.jobs].every(j=>[workerJob.id,legacy.id].includes(j.id)));
+  const csvResponse = await fetch(base+"/jobs/export.csv?search=WORKER&status=closed",{
+    headers:{Authorization:`Bearer ${manager.token}`,Cookie:`mli_mode=private; mli_workspace=${org.id}`}
+  });
+  assert.equal(csvResponse.status,200);
+  assert.match(csvResponse.headers.get("content-type")!,/text\/csv; charset=utf-8/i);
+  const bytes = new Uint8Array(await csvResponse.arrayBuffer());
+  assert.deepEqual([...bytes.slice(0,3)],[239,187,191]);
+  const csv = new TextDecoder().decode(bytes);
+  assert.ok(csv.includes('"WORKER"')); assert.ok(!csv.includes('"PERMISSIONS"'));
+  for (const endpoint of ["/jobs/board","/jobs/export.csv"]) {
+    await outsider.call(endpoint,"GET",undefined,403,{Cookie:`mli_mode=private; mli_workspace=${org.id}`});
+  }
+  verify("board and filtered UTF-8 CSV isolate real workspace jobs; foreign access denied",()=>{});
   verify("manager closure and weighted closed-only dashboard unchanged",()=>{
     assert.equal(dash.totalJobs,1);assert.equal(dash.issued,100);assert.equal(dash.scrapPercent,10);
   });

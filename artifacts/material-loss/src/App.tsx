@@ -23,6 +23,7 @@ import JobNew from '@/pages/job-new';
 import JobDetail from '@/pages/job-detail';
 import JobEdit from '@/pages/job-edit';
 import Settings from '@/pages/settings';
+import Board from '@/pages/board';
 
 const queryClient: QueryClient = new QueryClient({
   // Any scoped 403 means role or membership changed: re-check the workspace immediately.
@@ -59,6 +60,7 @@ function Router({ role }: { role: WorkspaceRole }) {
       <Switch>
         <Route path="/" component={worker ? Jobs : Dashboard} />
         {worker && <Route path="/dashboard" component={Restricted} />}
+        <Route path="/board" component={worker ? Restricted : Board} />
         <Route path="/jobs" component={Jobs} />
         <Route path="/jobs/new" component={JobNew} />
         <Route path="/jobs/:id/edit" component={JobEdit} />

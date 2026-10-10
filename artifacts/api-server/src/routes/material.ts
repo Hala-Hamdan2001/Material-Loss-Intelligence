@@ -14,6 +14,7 @@ import insightRouter from "./material-insights";
 import accessRouter from "./workspace-access";
 import { mutate, requireManager, jobScope } from "../lib/permissions";
 import { performanceJobs } from "../lib/dashboard-performance";
+import { boardJobs, filterJobs, jobsCsv } from "../lib/job-reporting";
 
 const router: IRouter = Router();
 router.use(accessRouter);
@@ -66,12 +67,21 @@ router.get("/dashboard", async (req,res) => {
 router.get("/jobs", async (req,res) => {
   const q = ListJobsQueryParams.parse(req.query); validateDate(q.from); validateDate(q.to);
   const jobs = await allJobs(await workspace(req,res));
-  res.json(ListJobsResponse.parse(jobs.filter(j => {
-    const date = (j.closedAt ?? j.createdAt).slice(0,10);
-    return (!q.search || j.reference.toLocaleLowerCase().includes(q.search.toLocaleLowerCase())) &&
-      (!q.machine || j.machine === q.machine) && (!q.material || j.material === q.material) &&
-      (!q.status || j.status === q.status) && (!q.from || date >= q.from) && (!q.to || date <= q.to);
-  })));
+  res.json(ListJobsResponse.parse(filterJobs(jobs, q)));
+});
+router.get("/jobs/board", async (req,res) => {
+  const org = await workspace(req,res); requireManager(org);
+  res.json(boardJobs(await allJobs(org)));
+});
+router.get("/jobs/export.csv", async (req,res) => {
+  const org = await workspace(req,res); requireManager(org);
+  const q = ListJobsQueryParams.parse(req.query); validateDate(q.from); validateDate(q.to);
+  if (q.from && q.to && q.from > q.to) fail(400,"INVALID_INPUT");
+  const jobs = filterJobs(await allJobs(org), q);
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader("Content-Disposition", 'attachment; filename="material-loss-jobs.csv"');
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.send(jobsCsv(jobs));
 });
 router.post("/jobs", async (req,res) => {
   const input = CreateJobBody.parse(req.body); validateInput(input);

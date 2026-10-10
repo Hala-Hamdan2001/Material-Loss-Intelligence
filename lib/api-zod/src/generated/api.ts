@@ -7,6 +7,213 @@
 import * as zod from 'zod';
 
 
+/**
+ * Manager or Demo only. Investigation notes or high_scrap/above_baseline signals take priority over accounting status.
+ */
+export const getJobBoardResponseJobsItemOneReferenceMax = 80;
+
+export const getJobBoardResponseJobsItemOneIssuedMin = 0;
+export const getJobBoardResponseJobsItemOneIssuedMax = 100000000;
+
+export const getJobBoardResponseJobsItemOneGoodMin = 0;
+export const getJobBoardResponseJobsItemOneGoodMax = 100000000;
+
+export const getJobBoardResponseJobsItemOneReusableMin = 0;
+export const getJobBoardResponseJobsItemOneReusableMax = 100000000;
+
+export const getJobBoardResponseJobsItemOneReworkMin = 0;
+export const getJobBoardResponseJobsItemOneReworkMax = 100000000;
+
+export const getJobBoardResponseJobsItemOneScrapEntriesItemWeightMin = 0;
+export const getJobBoardResponseJobsItemOneScrapEntriesItemWeightMax = 100000000;
+
+export const getJobBoardResponseInvestigationItemOneReferenceMax = 80;
+
+export const getJobBoardResponseInvestigationItemOneIssuedMin = 0;
+export const getJobBoardResponseInvestigationItemOneIssuedMax = 100000000;
+
+export const getJobBoardResponseInvestigationItemOneGoodMin = 0;
+export const getJobBoardResponseInvestigationItemOneGoodMax = 100000000;
+
+export const getJobBoardResponseInvestigationItemOneReusableMin = 0;
+export const getJobBoardResponseInvestigationItemOneReusableMax = 100000000;
+
+export const getJobBoardResponseInvestigationItemOneReworkMin = 0;
+export const getJobBoardResponseInvestigationItemOneReworkMax = 100000000;
+
+export const getJobBoardResponseInvestigationItemOneScrapEntriesItemWeightMin = 0;
+export const getJobBoardResponseInvestigationItemOneScrapEntriesItemWeightMax = 100000000;
+
+export const getJobBoardResponseClosedItemOneReferenceMax = 80;
+
+export const getJobBoardResponseClosedItemOneIssuedMin = 0;
+export const getJobBoardResponseClosedItemOneIssuedMax = 100000000;
+
+export const getJobBoardResponseClosedItemOneGoodMin = 0;
+export const getJobBoardResponseClosedItemOneGoodMax = 100000000;
+
+export const getJobBoardResponseClosedItemOneReusableMin = 0;
+export const getJobBoardResponseClosedItemOneReusableMax = 100000000;
+
+export const getJobBoardResponseClosedItemOneReworkMin = 0;
+export const getJobBoardResponseClosedItemOneReworkMax = 100000000;
+
+export const getJobBoardResponseClosedItemOneScrapEntriesItemWeightMin = 0;
+export const getJobBoardResponseClosedItemOneScrapEntriesItemWeightMax = 100000000;
+
+
+
+export const GetJobBoardResponse = zod.object({
+  "jobs": zod.array(zod.object({
+  "reference": zod.string().min(1).max(getJobBoardResponseJobsItemOneReferenceMax),
+  "product": zod.string(),
+  "material": zod.string(),
+  "machine": zod.string(),
+  "issued": zod.number().min(getJobBoardResponseJobsItemOneIssuedMin).max(getJobBoardResponseJobsItemOneIssuedMax),
+  "good": zod.number().min(getJobBoardResponseJobsItemOneGoodMin).max(getJobBoardResponseJobsItemOneGoodMax),
+  "reusable": zod.number().min(getJobBoardResponseJobsItemOneReusableMin).max(getJobBoardResponseJobsItemOneReusableMax),
+  "rework": zod.number().min(getJobBoardResponseJobsItemOneReworkMin).max(getJobBoardResponseJobsItemOneReworkMax),
+  "scrapEntries": zod.array(zod.object({
+  "reason": zod.string(),
+  "weight": zod.number().min(getJobBoardResponseJobsItemOneScrapEntriesItemWeightMin).max(getJobBoardResponseJobsItemOneScrapEntriesItemWeightMax)
+})),
+  "notes": zod.string()
+}).and(zod.object({
+  "id": zod.string(),
+  "status": zod.enum(['draft', 'closed']),
+  "revision": zod.number().int(),
+  "createdAt": zod.string(),
+  "closedAt": zod.string().nullable(),
+  "isDemo": zod.boolean(),
+  "tolerance": zod.number(),
+  "metrics": zod.object({
+  "scrap": zod.number(),
+  "accounted": zod.number(),
+  "residual": zod.number(),
+  "yieldPercent": zod.number(),
+  "scrapPercent": zod.number(),
+  "reusablePercent": zod.number(),
+  "reworkPercent": zod.number(),
+  "balanced": zod.boolean(),
+  "largestReason": zod.string(),
+  "largestWeight": zod.number(),
+  "largestContribution": zod.number()
+}),
+  "signals": zod.array(zod.enum(['high_scrap', 'above_baseline', 'insufficient_history'])),
+  "investigationNotes": zod.array(zod.object({
+  "id": zod.string(),
+  "text": zod.string(),
+  "createdAt": zod.string()
+})),
+  "createdBy": zod.string().nullable(),
+  "assignedTo": zod.string().nullable()
+}))),
+  "investigation": zod.array(zod.object({
+  "reference": zod.string().min(1).max(getJobBoardResponseInvestigationItemOneReferenceMax),
+  "product": zod.string(),
+  "material": zod.string(),
+  "machine": zod.string(),
+  "issued": zod.number().min(getJobBoardResponseInvestigationItemOneIssuedMin).max(getJobBoardResponseInvestigationItemOneIssuedMax),
+  "good": zod.number().min(getJobBoardResponseInvestigationItemOneGoodMin).max(getJobBoardResponseInvestigationItemOneGoodMax),
+  "reusable": zod.number().min(getJobBoardResponseInvestigationItemOneReusableMin).max(getJobBoardResponseInvestigationItemOneReusableMax),
+  "rework": zod.number().min(getJobBoardResponseInvestigationItemOneReworkMin).max(getJobBoardResponseInvestigationItemOneReworkMax),
+  "scrapEntries": zod.array(zod.object({
+  "reason": zod.string(),
+  "weight": zod.number().min(getJobBoardResponseInvestigationItemOneScrapEntriesItemWeightMin).max(getJobBoardResponseInvestigationItemOneScrapEntriesItemWeightMax)
+})),
+  "notes": zod.string()
+}).and(zod.object({
+  "id": zod.string(),
+  "status": zod.enum(['draft', 'closed']),
+  "revision": zod.number().int(),
+  "createdAt": zod.string(),
+  "closedAt": zod.string().nullable(),
+  "isDemo": zod.boolean(),
+  "tolerance": zod.number(),
+  "metrics": zod.object({
+  "scrap": zod.number(),
+  "accounted": zod.number(),
+  "residual": zod.number(),
+  "yieldPercent": zod.number(),
+  "scrapPercent": zod.number(),
+  "reusablePercent": zod.number(),
+  "reworkPercent": zod.number(),
+  "balanced": zod.boolean(),
+  "largestReason": zod.string(),
+  "largestWeight": zod.number(),
+  "largestContribution": zod.number()
+}),
+  "signals": zod.array(zod.enum(['high_scrap', 'above_baseline', 'insufficient_history'])),
+  "investigationNotes": zod.array(zod.object({
+  "id": zod.string(),
+  "text": zod.string(),
+  "createdAt": zod.string()
+})),
+  "createdBy": zod.string().nullable(),
+  "assignedTo": zod.string().nullable()
+}))),
+  "closed": zod.array(zod.object({
+  "reference": zod.string().min(1).max(getJobBoardResponseClosedItemOneReferenceMax),
+  "product": zod.string(),
+  "material": zod.string(),
+  "machine": zod.string(),
+  "issued": zod.number().min(getJobBoardResponseClosedItemOneIssuedMin).max(getJobBoardResponseClosedItemOneIssuedMax),
+  "good": zod.number().min(getJobBoardResponseClosedItemOneGoodMin).max(getJobBoardResponseClosedItemOneGoodMax),
+  "reusable": zod.number().min(getJobBoardResponseClosedItemOneReusableMin).max(getJobBoardResponseClosedItemOneReusableMax),
+  "rework": zod.number().min(getJobBoardResponseClosedItemOneReworkMin).max(getJobBoardResponseClosedItemOneReworkMax),
+  "scrapEntries": zod.array(zod.object({
+  "reason": zod.string(),
+  "weight": zod.number().min(getJobBoardResponseClosedItemOneScrapEntriesItemWeightMin).max(getJobBoardResponseClosedItemOneScrapEntriesItemWeightMax)
+})),
+  "notes": zod.string()
+}).and(zod.object({
+  "id": zod.string(),
+  "status": zod.enum(['draft', 'closed']),
+  "revision": zod.number().int(),
+  "createdAt": zod.string(),
+  "closedAt": zod.string().nullable(),
+  "isDemo": zod.boolean(),
+  "tolerance": zod.number(),
+  "metrics": zod.object({
+  "scrap": zod.number(),
+  "accounted": zod.number(),
+  "residual": zod.number(),
+  "yieldPercent": zod.number(),
+  "scrapPercent": zod.number(),
+  "reusablePercent": zod.number(),
+  "reworkPercent": zod.number(),
+  "balanced": zod.boolean(),
+  "largestReason": zod.string(),
+  "largestWeight": zod.number(),
+  "largestContribution": zod.number()
+}),
+  "signals": zod.array(zod.enum(['high_scrap', 'above_baseline', 'insufficient_history'])),
+  "investigationNotes": zod.array(zod.object({
+  "id": zod.string(),
+  "text": zod.string(),
+  "createdAt": zod.string()
+})),
+  "createdBy": zod.string().nullable(),
+  "assignedTo": zod.string().nullable()
+})))
+})
+
+
+/**
+ * Manager or Demo only. UTF-8 BOM CSV; filters have the same semantics as GET /jobs.
+ */
+export const ExportJobsCsvQueryParams = zod.object({
+  "search": zod.coerce.string().optional(),
+  "machine": zod.coerce.string().optional(),
+  "material": zod.coerce.string().optional(),
+  "status": zod.enum(['draft', 'closed']).optional(),
+  "from": zod.coerce.string().optional(),
+  "to": zod.coerce.string().optional()
+})
+
+export const ExportJobsCsvResponse = zod.unknown()
+
+
 export const HealthCheckResponse = zod.object({
   "status": zod.string()
 })

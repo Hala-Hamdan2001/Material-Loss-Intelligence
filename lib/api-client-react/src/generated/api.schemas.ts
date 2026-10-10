@@ -344,6 +344,29 @@ export interface WorkspaceChoice {
   role: WorkspaceChoiceRole;
 }
 
+export type GetJobBoard200 = {
+  jobs: Job[];
+  investigation: Job[];
+  closed: Job[];
+};
+
+export type ExportJobsCsvParams = {
+search?: string;
+machine?: string;
+material?: string;
+status?: ExportJobsCsvStatus;
+from?: string;
+to?: string;
+};
+
+export type ExportJobsCsvStatus = typeof ExportJobsCsvStatus[keyof typeof ExportJobsCsvStatus];
+
+
+export const ExportJobsCsvStatus = {
+  draft: 'draft',
+  closed: 'closed',
+} as const;
+
 export type GetDashboardParams = {
 from?: string;
 to?: string;

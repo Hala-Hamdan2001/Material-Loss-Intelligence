@@ -25,8 +25,10 @@ import type {
   Comparison,
   Dashboard,
   ErrorEnvelope,
+  ExportJobsCsvParams,
   GetComparisonParams,
   GetDashboardParams,
+  GetJobBoard200,
   HealthStatus,
   Insight,
   InsightInput,
@@ -76,6 +78,161 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetJobBoardUrl = () => {
+
+
+
+
+  return `/api/jobs/board`
+}
+
+/**
+ * Manager or Demo only. Investigation notes or high_scrap/above_baseline signals take priority over accounting status.
+ */
+export const getJobBoard = async ( options?: Parameters<typeof customFetch>[1]): Promise<GetJobBoard200> => {
+
+  return customFetch<GetJobBoard200>(getGetJobBoardUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetJobBoardQueryKey = () => {
+    return [
+    `/api/jobs/board`
+    ] as const;
+    }
+
+
+export const getGetJobBoardQueryOptions = <TData = Awaited<ReturnType<typeof getJobBoard>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getJobBoard>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetJobBoardQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getJobBoard>>> = ({ signal }) => getJobBoard({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getJobBoard>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetJobBoardQueryResult = NonNullable<Awaited<ReturnType<typeof getJobBoard>>>
+export type GetJobBoardQueryError = ErrorType<void>
+
+
+
+export function useGetJobBoard<TData = Awaited<ReturnType<typeof getJobBoard>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getJobBoard>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetJobBoardQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getExportJobsCsvUrl = (params?: ExportJobsCsvParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/jobs/export.csv?${stringifiedParams}` : `/api/jobs/export.csv`
+}
+
+/**
+ * Manager or Demo only. UTF-8 BOM CSV; filters have the same semantics as GET /jobs.
+ */
+export const exportJobsCsv = async (params?: ExportJobsCsvParams, options?: Parameters<typeof customFetch>[1]): Promise<string> => {
+
+  return customFetch<string>(getExportJobsCsvUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getExportJobsCsvQueryKey = (params?: ExportJobsCsvParams,) => {
+    return [
+    `/api/jobs/export.csv`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getExportJobsCsvQueryOptions = <TData = Awaited<ReturnType<typeof exportJobsCsv>>, TError = ErrorType<void>>(params?: ExportJobsCsvParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof exportJobsCsv>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getExportJobsCsvQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof exportJobsCsv>>> = ({ signal }) => exportJobsCsv(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof exportJobsCsv>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ExportJobsCsvQueryResult = NonNullable<Awaited<ReturnType<typeof exportJobsCsv>>>
+export type ExportJobsCsvQueryError = ErrorType<void>
+
+
+
+export function useExportJobsCsv<TData = Awaited<ReturnType<typeof exportJobsCsv>>, TError = ErrorType<void>>(
+ params?: ExportJobsCsvParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof exportJobsCsv>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getExportJobsCsvQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getHealthCheckUrl = () => {
 

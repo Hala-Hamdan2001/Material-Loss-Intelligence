@@ -12,7 +12,7 @@ export function BackLink({ fallback = '/jobs' }: { fallback?: string }) {
   const ws = useGetWorkspace();
   const href = back ?? fallback;
   const isDashboard = (href === '/' || href.startsWith('/?')) && ws.data?.role !== 'worker';
-  const label = back === null ? t('detail.back') : isDashboard ? t('nav.backDashboard') : t('nav.backJobs');
+  const label = href === '/board' ? t('nav.board') : back === null ? t('detail.back') : isDashboard ? t('nav.backDashboard') : t('nav.backJobs');
   return (
     <Link
       href={href}

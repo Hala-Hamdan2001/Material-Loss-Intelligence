@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent, type Rea
 import { Link, useLocation } from 'wouter';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import { LayoutGrid, ListChecks, PlusSquare, SlidersHorizontal, Languages, Database, LogIn, LogOut, ChevronsUpDown, Lock, FlaskConical, Users, Menu } from 'lucide-react';
+import { LayoutGrid, ListChecks, PlusSquare, SlidersHorizontal, Languages, Database, LogIn, LogOut, ChevronsUpDown, Lock, FlaskConical, Users, Menu, Columns3 } from 'lucide-react';
 import { useSwitchWorkspace, useListWorkspaces, getGetWorkspaceQueryKey, getListWorkspacesQueryKey, type Workspace } from '@workspace/api-client-react';
 import { useAuth } from '@workspace/replit-auth-web';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 const NAV = [
   { href: '/', key: 'dashboard', Icon: LayoutGrid },
   { href: '/jobs', key: 'jobs', Icon: ListChecks },
+  { href: '/board', key: 'board', Icon: Columns3 },
   { href: '/jobs/new', key: 'newJob', Icon: PlusSquare },
   { href: '/settings', key: 'settings', Icon: SlidersHorizontal },
 ] as const;
@@ -242,7 +243,7 @@ export function Shell({ ws, children }: { ws: Workspace; children: ReactNode }) 
   const mobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const navTrigger = useRef<HTMLButtonElement>(null);
-  const nav = ws.role === 'worker' ? NAV.filter((n) => n.key !== 'dashboard') : NAV;
+  const nav = ws.role === 'worker' ? NAV.filter((n) => n.key !== 'dashboard' && n.key !== 'board') : NAV;
   const rtl = i18n.dir() === 'rtl';
 
   // New page: start at the top (list pages restore their own remembered position afterwards).

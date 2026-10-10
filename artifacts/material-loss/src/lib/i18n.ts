@@ -8,7 +8,7 @@ const en = {
     tagline: 'Account for every kilogram',
     skip: 'Skip to content',
   },
-  nav: { dashboard: 'Dashboard', jobs: 'Jobs', newJob: 'New job', settings: 'Settings', menu: 'Main navigation', open: 'Open navigation', close: 'Close navigation', backDashboard: 'Back to dashboard', backJobs: 'Back to jobs', leave: 'You have unsaved changes. Leave this page and discard them?', workspace: 'Workspace' },
+  nav: { dashboard: 'Dashboard', jobs: 'Jobs', newJob: 'New job', settings: 'Settings', board: 'Board', menu: 'Main navigation', open: 'Open navigation', close: 'Close navigation', backDashboard: 'Back to dashboard', backJobs: 'Back to jobs', leave: 'You have unsaved changes. Leave this page and discard them?', workspace: 'Workspace' },
   lang: { switchTo: 'العربية', label: 'Language' },
   workspace: {
     demo: 'Demo workspace',
@@ -129,6 +129,21 @@ const en = {
     noMatch: 'No jobs match these filters', noMatchDesc: 'Try a broader search or clear filters.',
     error: 'Jobs could not be loaded.',
     open: 'Open job {{ref}}',
+    export: 'Export CSV', exporting: 'Exporting', exportHint: 'Download the jobs matching the current filters as CSV.',
+    exportError: 'The CSV export failed.',
+  },
+  board: {
+    title: 'Investigation board',
+    subtitle: 'Jobs grouped by what needs attention. Read-only; open a card to act.',
+    explain: 'Columns are computed by the server. A job with investigation notes, high scrap or above-baseline scrap goes to Need investigation, even if its accounting status is Closed. The badge on each card shows the true accounting status.',
+    colJobs: 'Jobs', colJobsDesc: 'Open drafts without investigation signals.',
+    colInvestigation: 'Need investigation', colInvestigationDesc: 'Notes, high scrap or above-baseline signals.',
+    colClosed: 'Closed', colClosedDesc: 'Closed jobs with no investigation signals.',
+    closedButOpen: 'Accounting is closed; the loss still needs investigation.',
+    accounting: 'Accounting status',
+    notes_one: '{{count}} note', notes_other: '{{count}} notes',
+    emptyCol: 'No jobs in this column.',
+    error: 'The board could not be loaded.',
   },
   form: {
     newTitle: 'Record a job', newSubtitle: 'Enter every kilogram issued and where it went.',
@@ -247,7 +262,7 @@ type Tree = { [k: string]: string | Tree };
 
 const ar: Tree = {
   app: { name: 'ذكاء فاقد المواد', short: 'ذفم', tagline: 'احتسب كل كيلوغرام', skip: 'انتقل إلى المحتوى' },
-  nav: { dashboard: 'لوحة المتابعة', jobs: 'أوامر العمل', newJob: 'أمر جديد', settings: 'الإعدادات', menu: 'التنقل الرئيسي', open: 'فتح التنقل', close: 'إغلاق التنقل', backDashboard: 'العودة إلى اللوحة', backJobs: 'العودة إلى الأوامر', leave: 'لديك تغييرات غير محفوظة. هل تغادر الصفحة وتتجاهلها؟', workspace: 'مساحة العمل' },
+  nav: { dashboard: 'لوحة المتابعة', jobs: 'أوامر العمل', newJob: 'أمر جديد', settings: 'الإعدادات', board: 'اللوحة الثلاثية', menu: 'التنقل الرئيسي', open: 'فتح التنقل', close: 'إغلاق التنقل', backDashboard: 'العودة إلى اللوحة', backJobs: 'العودة إلى الأوامر', leave: 'لديك تغييرات غير محفوظة. هل تغادر الصفحة وتتجاهلها؟', workspace: 'مساحة العمل' },
   lang: { switchTo: 'English', label: 'اللغة' },
   workspace: {
     demo: 'مساحة العرض التجريبي', private: 'مساحة خاصة',
@@ -325,6 +340,21 @@ const ar: Tree = {
     empty: 'لا أوامر بعد', emptyDesc: 'ستظهر الأوامر المسجلة هنا.',
     noMatch: 'لا أوامر تطابق عوامل التصفية', noMatchDesc: 'جرّب بحثًا أوسع أو امسح عوامل التصفية.',
     error: 'تعذّر تحميل الأوامر.', open: 'فتح الأمر {{ref}}',
+    export: 'تصدير CSV', exporting: 'جارٍ التصدير', exportHint: 'تنزيل الأوامر المطابقة لعوامل التصفية الحالية بصيغة CSV.',
+    exportError: 'فشل تصدير ملف CSV.',
+  },
+  board: {
+    title: 'لوحة التحقيق',
+    subtitle: 'الأوامر مجمّعة حسب ما يحتاج إلى متابعة. للعرض فقط؛ افتح البطاقة لاتخاذ إجراء.',
+    explain: 'يحدد الخادم الأعمدة. الأمر الذي عليه ملاحظات تحقيق أو خردة مرتفعة أو خردة أعلى من خط الأساس يظهر في عمود يحتاج إلى تحقيق حتى لو كانت حالته المحاسبية مغلقة. تعرض الشارة على كل بطاقة الحالة المحاسبية الفعلية.',
+    colJobs: 'أوامر العمل', colJobsDesc: 'مسودات مفتوحة دون إشارات تحقيق.',
+    colInvestigation: 'يحتاج إلى تحقيق', colInvestigationDesc: 'ملاحظات أو خردة مرتفعة أو أعلى من خط الأساس.',
+    colClosed: 'مغلقة', colClosedDesc: 'أوامر مغلقة دون إشارات تحقيق.',
+    closedButOpen: 'المحاسبة مغلقة، لكن الفاقد ما زال يحتاج إلى تحقيق.',
+    accounting: 'الحالة المحاسبية',
+    notes_zero: 'لا ملاحظات', notes_one: 'ملاحظة واحدة', notes_two: 'ملاحظتان', notes_few: '{{count}} ملاحظات', notes_many: '{{count}} ملاحظة', notes_other: '{{count}} ملاحظة',
+    emptyCol: 'لا أوامر في هذا العمود.',
+    error: 'تعذّر تحميل اللوحة.',
   },
   form: {
     newTitle: 'تسجيل أمر عمل', newSubtitle: 'أدخل كل كيلوغرام مصروف وأين ذهب.',

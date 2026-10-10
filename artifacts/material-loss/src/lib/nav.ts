@@ -5,10 +5,11 @@
  */
 
 /** Only these in-app list surfaces may be used as a "back" destination. */
-const RETURN_PATHS = new Set(['/', '/jobs']);
+const RETURN_PATHS = new Set(['/', '/jobs', '/board']);
 const RETURN_KEYS: Record<string, readonly string[]> = {
   // Workers use the Jobs screen at "/" as well as at "/jobs".
   '/': ['from', 'to', 'search', 'machine', 'material', 'status'],
+  '/board': [],
   '/jobs': ['search', 'from', 'to', 'machine', 'material', 'status'],
 };
 

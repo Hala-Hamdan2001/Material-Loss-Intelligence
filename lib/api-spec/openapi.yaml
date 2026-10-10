@@ -10,6 +10,45 @@
     }
   ],
   "paths": {
+    "/jobs/board": {
+      "get": {
+        "operationId": "getJobBoard",
+        "description": "Manager or Demo only. Investigation notes or high_scrap/above_baseline signals take priority over accounting status.",
+        "responses": {
+          "200": {
+            "description": "Workspace-scoped board",
+            "content": {"application/json": {"schema": {
+              "type": "object",
+              "required": ["jobs", "investigation", "closed"],
+              "properties": {
+                "jobs": {"type": "array", "items": {"$ref": "#/components/schemas/Job"}},
+                "investigation": {"type": "array", "items": {"$ref": "#/components/schemas/Job"}},
+                "closed": {"type": "array", "items": {"$ref": "#/components/schemas/Job"}}
+              }
+            }}}
+          },
+          "403": {"description": "Manager access required"}
+        }
+      }
+    },
+    "/jobs/export.csv": {
+      "get": {
+        "operationId": "exportJobsCsv",
+        "description": "Manager or Demo only. UTF-8 BOM CSV; filters have the same semantics as GET /jobs.",
+        "parameters": [
+          {"name":"search","in":"query","schema":{"type":"string"}},
+          {"name":"machine","in":"query","schema":{"type":"string"}},
+          {"name":"material","in":"query","schema":{"type":"string"}},
+          {"name":"status","in":"query","schema":{"type":"string","enum":["draft","closed"]}},
+          {"name":"from","in":"query","schema":{"type":"string"}},
+          {"name":"to","in":"query","schema":{"type":"string"}}
+        ],
+        "responses": {
+          "200": {"description":"Filtered workspace CSV","content":{"text/csv":{"schema":{"type":"string"}}}},
+          "403": {"description":"Manager access required"}
+        }
+      }
+    },
     "/healthz": {
       "get": {
         "operationId": "healthCheck",

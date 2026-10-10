@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'wouter';
 import { useTranslation } from 'react-i18next';
-import { Plus, Search, Inbox, SearchX } from 'lucide-react';
-import { useListJobs, useGetReferenceData, getGetReferenceDataQueryKey } from '@workspace/api-client-react';
+import { Plus, Search, Inbox, SearchX, Download } from 'lucide-react';
+import { useGetWorkspace, getGetWorkspaceQueryKey, useListJobs, useGetReferenceData, getGetReferenceDataQueryKey } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,7 +12,8 @@ import { JobList } from '@/components/job-list';
 import { DateRangeFields } from '@/components/date-range';
 import { withBack } from '@/lib/nav';
 import { useUrlParams, useValidRange, useScrollMemory } from '@/hooks/use-nav';
-import { cleanParams, useErrorText, useFmt } from '@/lib/format';
+import { cleanParams, errorCode, useErrorText, useFmt } from '@/lib/format';
+import { downloadJobsCsv } from '@/lib/board-api';
 
 const KEYS = ['search', 'from', 'to', 'machine', 'material', 'status'] as const;
 
@@ -46,6 +48,25 @@ export default function Jobs() {
   const q = useListJobs(params);
   const filtered = !!params || !range.check.ok;
   useScrollMemory(here, !!q.data);
+  const qc = useQueryClient();
+  const ws = useGetWorkspace({ query: { queryKey: getGetWorkspaceQueryKey() } });
+  const canExport = !!ws.data && ws.data.role !== 'worker';
+  const [exporting, setExporting] = useState(false);
+  const exportRequest = useRef<AbortController | null>(null);
+  useEffect(() => () => exportRequest.current?.abort(), []);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const exportCsv = async () => {
+    setExporting(true); setExportError(null);
+    const controller = new AbortController();
+    exportRequest.current = controller;
+    try {
+      await downloadJobsCsv(params, controller.signal);
+    } catch (e) {
+      if (controller.signal.aborted) return;
+      setExportError(`${t('jobs.exportError')} ${errText(e)}`);
+      if (['FORBIDDEN', 'UNAUTHORIZED'].includes(errorCode(e))) void qc.invalidateQueries({ queryKey: ['/api/workspace'], exact: true });
+    } finally { setExporting(false); }
+  };
   const clear = () => {
     setSearchInput(''); lastPushed.current = '';
     set({ search: '', from: '', to: '', machine: '', material: '', status: '' });
@@ -57,14 +78,25 @@ export default function Jobs() {
         title={t('jobs.title')}
         subtitle={t('jobs.subtitle')}
         actions={
+          <>
+          {canExport && (
+            <Button variant="outline" className="h-11 lg:h-9" disabled={exporting} onClick={() => void exportCsv()} title={t('jobs.exportHint')} data-testid="button-export-csv">
+              <Download className="h-4 w-4" aria-hidden />
+              {exporting ? t('jobs.exporting') : t('jobs.export')}
+            </Button>
+          )}
           <Button asChild className="h-11 lg:h-9">
             <Link href={withBack('/jobs/new', here)} data-testid="button-new-job">
               <Plus className="h-4 w-4" aria-hidden />
               {t('nav.newJob')}
             </Link>
           </Button>
+          </>
         }
       />
+      {exportError && (
+        <div role="alert" className="mb-3 rounded-md border border-scrap/50 bg-scrap/10 px-3 py-2 text-sm" data-testid="alert-export-error">{exportError}</div>
+      )}
       <Panel>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-7">
           <div className="sm:col-span-2 lg:col-span-2">
