@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'wouter';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, UserCheck, Pencil, Lock, Unlock, Sparkles, MessageSquareWarning, GitCompare, FileQuestion, Equal, EqualNot } from 'lucide-react';
+import { UserCheck, Pencil, Lock, Unlock, Sparkles, MessageSquareWarning, GitCompare, FileQuestion, Equal, EqualNot } from 'lucide-react';
 import {
   useGetJob, useGetComparison, useCloseJob, useReopenJob, useAddInvestigationNote, useGenerateInsight, useGetWorkspace, useListMembers, useAssignJob,
   getGetJobQueryKey, getListMembersQueryKey, getGetComparisonQueryKey, type Job, type Insight,
@@ -14,17 +14,21 @@ import { PageHeader, Panel, Stat, StatusBadge, SignalBadge, OutcomeBar, ErrorSta
 import { useToast } from '@/hooks/use-toast';
 import { errorCode, missingForClose, useErrorText, useFieldList, useFmt, useInvalidateBusiness, useReasonLabel } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { useBackTarget } from '@/hooks/use-nav';
+import { BackLink } from '@/components/back-link';
+import { withBack } from '@/lib/nav';
 
 export default function JobDetail() {
   const { id = '' } = useParams<{ id: string }>();
   const { t } = useTranslation();
   const errText = useErrorText();
+  const back = useBackTarget();
   const q = useGetJob(id, { query: { enabled: !!id, queryKey: getGetJobQueryKey(id), staleTime: 15_000 } });
 
   if (q.isLoading) return <LoadingBlock rows={10} />;
   if (q.isError || !q.data) {
     return errorCode(q.error) === 'NOT_FOUND' ? (
-      <EmptyState icon={<FileQuestion className="h-5 w-5" aria-hidden />} title={t('detail.notFound')} desc={t('detail.notFoundDesc')} action={<Button asChild variant="outline"><Link href="/jobs">{t('detail.back')}</Link></Button>} />
+      <EmptyState icon={<FileQuestion className="h-5 w-5" aria-hidden />} title={t('detail.notFound')} desc={t('detail.notFoundDesc')} action={<Button asChild variant="outline"><Link href={back ?? '/jobs'}>{t('detail.back')}</Link></Button>} />
     ) : (
       <ErrorState message={`${t('detail.error')} ${errText(q.error)}`} onRetry={() => void q.refetch()} />
     );
@@ -50,10 +54,7 @@ function Detail({ job }: { job: Job }) {
 
   return (
     <div>
-      <Link href="/jobs" className="mb-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground" data-testid="link-back">
-        <ArrowLeft className="h-4 w-4 rtl:rotate-180" aria-hidden />
-        {t('detail.back')}
-      </Link>
+      <BackLink />
       <PageHeader
         title={
           <span className="flex flex-wrap items-center gap-2">
@@ -238,6 +239,7 @@ function AssignmentPanel({ job, me }: { job: Job; me: string | null }) {
 }
 
 function JobActions({ job, worker }: { job: Job; worker: boolean }) {
+  const back = useBackTarget();
   const { t } = useTranslation();
   const { toast } = useToast();
   const errText = useErrorText();
@@ -253,7 +255,7 @@ function JobActions({ job, worker }: { job: Job; worker: boolean }) {
   if (worker) {
     return job.status === 'draft' ? (
       <Button asChild variant="outline" className="h-11 lg:h-9">
-        <Link href={`/jobs/${job.id}/edit`} data-testid="button-edit">
+        <Link href={withBack(`/jobs/${job.id}/edit`, back)} data-testid="button-edit">
           <Pencil className="h-4 w-4" aria-hidden />
           {t('common.edit')}
         </Link>
@@ -267,7 +269,7 @@ function JobActions({ job, worker }: { job: Job; worker: boolean }) {
     return (
       <>
         <Button asChild variant="outline" className="h-11 lg:h-9">
-          <Link href={`/jobs/${job.id}/edit`} data-testid="button-edit">
+          <Link href={withBack(`/jobs/${job.id}/edit`, back)} data-testid="button-edit">
             <Pencil className="h-4 w-4" aria-hidden />
             {t('common.edit')}
           </Link>

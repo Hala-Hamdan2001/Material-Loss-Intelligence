@@ -14,7 +14,7 @@ export function StatusBadge({ status }: { status: Job['status'] }) {
     <span
       data-testid={`status-${status}`}
       className={cn(
-        'inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide',
+        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold tracking-wide',
         closed ? 'border-primary/30 bg-primary/8 text-primary' : 'border-dashed border-muted-foreground/50 text-muted-foreground',
       )}
     >
@@ -35,7 +35,7 @@ export function SignalBadge({ signal }: { signal: JobSignalsItem }) {
   const s = SIGNAL_STYLE[signal];
   if (!s) return null;
   return (
-    <span data-testid={`signal-${signal}`} className={cn('inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 text-[11px] font-medium', s.cls)}>
+    <span data-testid={`signal-${signal}`} className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium', s.cls)}>
       <s.Icon className="h-3 w-3" aria-hidden />
       {t(`signals.${signal}`)}
     </span>
@@ -71,7 +71,7 @@ export function OutcomeBar({ issued, parts, compact = false, label }: { issued: 
   const desc = parts.map((p) => `${t(`outcome.${p.key}`)} ${f.kg(p.value)} (${f.pct(share(p.value))})`).join('; ');
   return (
     <div>
-      <div role="img" aria-label={`${label ?? t('dashboard.chartLabel')}: ${desc}`} className={cn('flex w-full overflow-hidden rounded-sm bg-muted', compact ? 'h-2' : 'h-4')}>
+      <div role="img" aria-label={`${label ?? t('dashboard.chartLabel')}: ${desc}`} className={cn('flex w-full gap-px overflow-hidden rounded-full bg-muted', compact ? 'h-1.5' : 'h-3.5')}>
         {parts.map((p) =>
           share(p.value) > 0 ? <div key={p.key} className={OUTCOME_COLORS[p.key]} style={{ width: `${share(p.value)}%` }} /> : null,
         )}
@@ -97,26 +97,26 @@ export function OutcomeBar({ issued, parts, compact = false, label }: { issued: 
 
 export function Panel({ title, desc, action, children, className, testId }: { title?: ReactNode; desc?: ReactNode; action?: ReactNode; children: ReactNode; className?: string; testId?: string }) {
   return (
-    <section data-testid={testId} className={cn('rounded-md border border-card-border bg-card', className)}>
+    <section data-testid={testId} className={cn('min-w-0 rounded-xl border border-card-border bg-card shadow-[0_1px_2px_hsl(219_45%_20%/0.05),0_4px_16px_-8px_hsl(219_45%_20%/0.08)]', className)}>
       {(title || action) && (
-        <header className="flex flex-wrap items-start justify-between gap-2 border-b border-border px-4 py-3">
+        <header className="flex flex-wrap items-start justify-between gap-2 px-5 pb-1 pt-4">
           <div className="min-w-0">
-            {title && <h2 className="text-sm font-semibold">{title}</h2>}
+            {title && <h2 className="text-[15px] font-semibold tracking-tight">{title}</h2>}
             {desc && <p className="mt-0.5 text-xs text-muted-foreground">{desc}</p>}
           </div>
           {action}
         </header>
       )}
-      <div className="p-4">{children}</div>
+      <div className="p-5 pt-3">{children}</div>
     </section>
   );
 }
 
 export function PageHeader({ title, subtitle, actions }: { title: ReactNode; subtitle?: ReactNode; actions?: ReactNode }) {
   return (
-    <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div className="min-w-0">
-        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{title}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-[28px] sm:leading-tight">{title}</h1>
         {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
@@ -127,7 +127,7 @@ export function PageHeader({ title, subtitle, actions }: { title: ReactNode; sub
 export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
   const { t } = useTranslation();
   return (
-    <div role="alert" className="flex flex-col items-start gap-3 rounded-md border border-scrap/30 bg-scrap/5 p-4 text-sm">
+    <div role="alert" className="flex flex-col items-start gap-3 rounded-xl border border-scrap/30 bg-scrap/5 p-4 text-sm">
       <div className="flex items-center gap-2 font-medium text-scrap">
         <AlertTriangle className="h-4 w-4" aria-hidden />
         {message}
@@ -144,8 +144,8 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
 
 export function EmptyState({ icon, title, desc, action }: { icon: ReactNode; title: string; desc?: string; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-md border border-dashed border-border px-6 py-10 text-center">
-      <div className="mb-1 grid h-10 w-10 place-items-center rounded-md bg-accent text-accent-foreground">{icon}</div>
+    <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-card/60 px-6 py-12 text-center">
+      <div className="mb-1 grid h-11 w-11 place-items-center rounded-full bg-accent text-accent-foreground">{icon}</div>
       <p className="font-medium">{title}</p>
       {desc && <p className="max-w-sm text-sm text-muted-foreground">{desc}</p>}
       {action && <div className="mt-2">{action}</div>}
@@ -158,7 +158,7 @@ export function LoadingBlock({ rows = 4, label }: { rows?: number; label?: strin
   return (
     <div role="status" aria-label={label ?? t('common.loading')} className="space-y-2">
       {Array.from({ length: rows }).map((_, i) => (
-        <Skeleton key={i} className="h-10 w-full" />
+        <Skeleton key={i} className="h-10 w-full rounded-lg" />
       ))}
       <span className="sr-only">{label ?? t('common.loading')}</span>
     </div>
@@ -166,17 +166,20 @@ export function LoadingBlock({ rows = 4, label }: { rows?: number; label?: strin
 }
 
 export function Stat({ label, value, sub, tone, testId }: { label: string; value: string; sub?: string; tone?: 'good' | 'scrap' | 'reusable' | 'rework'; testId?: string }) {
-  const toneCls = tone ? { good: 'border-t-good', scrap: 'border-t-scrap', reusable: 'border-t-reusable', rework: 'border-t-rework' }[tone] : 'border-t-primary';
+  const dot = tone ? { good: 'bg-good', scrap: 'bg-scrap', reusable: 'bg-reusable', rework: 'bg-rework' }[tone] : 'bg-primary';
   return (
-    <div data-testid={testId} className={cn('min-w-0 rounded-md border border-card-border border-t-2 bg-card px-3 py-2.5', toneCls)}>
-      <div className="truncate text-xs text-muted-foreground">{label}</div>
-      <div className="tnum mt-0.5 truncate font-mono text-lg font-semibold">{value}</div>
-      {sub && <div className="truncate text-xs text-muted-foreground">{sub}</div>}
+    <div data-testid={testId} className="min-w-0 rounded-xl border border-card-border bg-card px-4 py-3 shadow-[0_1px_2px_hsl(219_45%_20%/0.05)]">
+      <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+        <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', dot)} aria-hidden />
+        {label}
+      </div>
+      <div className="tnum mt-1 break-words font-mono text-xl font-semibold tracking-tight">{value}</div>
+      {sub && <div className="mt-0.5 truncate text-xs text-muted-foreground">{sub}</div>}
     </div>
   );
 }
 
 export function DemoTag() {
   const { t } = useTranslation();
-  return <span className="rounded-sm bg-rework/15 px-1 py-px text-[10px] font-semibold uppercase tracking-wide text-rework-ink">{t('detail.demoBadge')}</span>;
+  return <span className="rounded-full bg-rework/15 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-rework-ink">{t('detail.demoBadge')}</span>;
 }

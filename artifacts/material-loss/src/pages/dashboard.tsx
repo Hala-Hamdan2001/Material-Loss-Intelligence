@@ -1,31 +1,37 @@
-import { useState } from 'react';
 import { Link } from 'wouter';
 import { useTranslation } from 'react-i18next';
 import { Plus, Inbox, ShieldCheck } from 'lucide-react';
 import { useGetDashboard, useGetWorkspace } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PageHeader, Panel, Stat, OutcomeBar, ErrorState, EmptyState, LoadingBlock } from '@/components/bits';
 import { JobList } from '@/components/job-list';
-import { useFmt, useReasonLabel, useErrorText, cleanParams } from '@/lib/format';
+import { LatestClosedScrap, ScrapReasonsDonut } from '@/components/dashboard-charts';
+import { DateRangeFields } from '@/components/date-range';
+import { withBack } from '@/lib/nav';
+import { useUrlParams, useValidRange, useScrollMemory } from '@/hooks/use-nav';
+import { useFmt, useErrorText, cleanParams } from '@/lib/format';
+
+const KEYS = ['from', 'to'] as const;
 
 export default function Dashboard() {
   const { t } = useTranslation();
   const f = useFmt();
-  const reasonLabel = useReasonLabel();
   const errText = useErrorText();
   const ws = useGetWorkspace();
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
-  const params = cleanParams({ from, to });
+  const { values, set, here } = useUrlParams(KEYS);
+  const { from, to } = values;
+  const range = useValidRange(from, to);
+  // Only the last valid period is ever requested: no 400s while a range is half-typed.
+  const params = cleanParams(range.active);
   const q = useGetDashboard(params);
   const d = q.data;
+  const backTo = here;
+  useScrollMemory(here, !!d);
 
   const actions = (
     <Button asChild className="h-11 lg:h-9">
-      <Link href="/jobs/new" data-testid="button-new-job">
+      <Link href={withBack('/jobs/new', here)} data-testid="button-new-job">
         <Plus className="h-4 w-4" aria-hidden />
         {t('nav.newJob')}
       </Link>
@@ -36,32 +42,20 @@ export default function Dashboard() {
     <div>
       <PageHeader title={t('dashboard.title')} subtitle={t('dashboard.subtitle')} actions={actions} />
 
-      <div className="mb-4 flex flex-wrap items-end gap-3" role="group" aria-label={t('dashboard.period')}>
-        <div>
-          <Label htmlFor="d-from" className="text-xs">{t('common.from')}</Label>
-          <Input id="d-from" type="date" value={from} max={to || undefined} onChange={(e) => setFrom(e.target.value)} className="mt-1 h-11 w-40 lg:h-9" data-testid="input-from" />
-        </div>
-        <div>
-          <Label htmlFor="d-to" className="text-xs">{t('common.to')}</Label>
-          <Input id="d-to" type="date" value={to} min={from || undefined} onChange={(e) => setTo(e.target.value)} className="mt-1 h-11 w-40 lg:h-9" data-testid="input-to" />
-        </div>
-        {(from || to) && (
-          <Button variant="ghost" className="h-11 lg:h-9" onClick={() => { setFrom(''); setTo(''); }} data-testid="button-clear-period">
-            {t('common.clear')}
-          </Button>
-        )}
+      <div className="mb-6 rounded-xl border border-card-border bg-card px-4 py-3 shadow-[0_1px_2px_hsl(219_45%_20%/0.05)]">
+        <DateRangeFields idPrefix="d" from={from} to={to} check={range.check} active={range.active} onChange={(p) => set(p)} />
       </div>
 
       {q.isLoading ? (
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-2 md:grid-cols-4 xl:grid-cols-7">
-            {Array.from({ length: 7 }).map((_, i) => <Skeleton key={i} className="h-[68px]" />)}
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-4 2xl:grid-cols-7">
+            {Array.from({ length: 7 }).map((_, i) => <Skeleton key={i} className="h-[84px] rounded-xl" />)}
           </div>
           <LoadingBlock rows={6} />
         </div>
       ) : q.isError || !d ? (
         <ErrorState message={`${t('dashboard.error')} ${errText(q.error)}`} onRetry={() => void q.refetch()} />
-      ) : d.totalJobs === 0 && !params ? (
+      ) : d.totalJobs === 0 && d.draftCount === 0 && !params ? (
         <EmptyState
           icon={<Inbox className="h-5 w-5" aria-hidden />}
           title={t('dashboard.empty')}
@@ -69,8 +63,8 @@ export default function Dashboard() {
           action={actions}
         />
       ) : (
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-2 md:grid-cols-4 xl:grid-cols-7">
+        <div className="space-y-5">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 2xl:grid-cols-7" role="group" aria-label={t('dashboard.kpiGroup')}>
             <Stat testId="stat-total" label={t('metrics.totalJobs')} value={f.num(d.totalJobs)} sub={t('metrics.drafts', { count: d.draftCount, value: f.num(d.draftCount) }).replace(String(d.draftCount), f.num(d.draftCount))} />
             <Stat testId="stat-issued" label={t('metrics.issued')} value={f.kg(d.issued)} />
             <Stat testId="stat-good" tone="good" label={t('metrics.good')} value={f.kg(d.good)} />
@@ -84,7 +78,7 @@ export default function Dashboard() {
             {t('metrics.closedOnly')}
           </p>
 
-          <div className="grid gap-4 lg:grid-cols-5">
+          <div className="grid gap-5 lg:grid-cols-5">
             <Panel className="lg:col-span-3" title={t('dashboard.outcomes')} desc={t('dashboard.outcomesDesc')} testId="panel-outcomes">
               <OutcomeBar
                 issued={d.issued}
@@ -97,36 +91,16 @@ export default function Dashboard() {
               />
             </Panel>
             <Panel className="lg:col-span-2" title={t('dashboard.reasons')} desc={t('dashboard.reasonsDesc')} testId="panel-reasons">
-              {d.scrapReasons.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t('dashboard.noReasons')}</p>
-              ) : (
-                <ol className="space-y-2.5" aria-label={t('dashboard.reasonsChartLabel')}>
-                  {d.scrapReasons.map((r, i) => {
-                    const max = d.scrapReasons[0].weight || 1;
-                    return (
-                      <li key={r.reason} data-testid={`reason-${i}`}>
-                        <div className="flex items-baseline justify-between gap-2 text-sm">
-                          <span className="min-w-0 truncate">
-                            <span className="me-1.5 font-mono text-xs text-muted-foreground">{f.num(i + 1)}</span>
-                            {reasonLabel(r.reason)}
-                          </span>
-                          <span className="tnum shrink-0 font-mono text-xs">
-                            {f.kg(r.weight)} <span className="text-muted-foreground">{f.pct(r.contribution)}</span>
-                          </span>
-                        </div>
-                        <div className="mt-1 h-2 rounded-sm bg-muted" aria-hidden>
-                          <div className="h-2 rounded-sm bg-scrap" style={{ width: `${(r.weight / max) * 100}%` }} />
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ol>
-              )}
+              <ScrapReasonsDonut reasons={d.scrapReasons} />
             </Panel>
           </div>
 
+          <Panel title={t('dashboard.perfTitle')} desc={t('dashboard.perfDesc')} testId="panel-performance">
+            <LatestClosedScrap jobs={d.performanceJobs ?? []} backTo={backTo} />
+          </Panel>
+
           <Panel title={t('dashboard.attention')} desc={t('dashboard.attentionDesc')} testId="panel-attention">
-            {d.attentionJobs.length === 0 ? <p className="text-sm text-muted-foreground">{t('dashboard.noAttention')}</p> : <JobList jobs={d.attentionJobs} dense />}
+            {d.attentionJobs.length === 0 ? <p className="text-sm text-muted-foreground">{t('dashboard.noAttention')}</p> : <JobList jobs={d.attentionJobs} dense backTo={backTo} />}
           </Panel>
 
           <Panel
@@ -138,7 +112,7 @@ export default function Dashboard() {
               </Link>
             }
           >
-            {d.recentJobs.length === 0 ? <p className="text-sm text-muted-foreground">{t('dashboard.noRecent')}</p> : <JobList jobs={d.recentJobs} />}
+            {d.recentJobs.length === 0 ? <p className="text-sm text-muted-foreground">{t('dashboard.noRecent')}</p> : <JobList jobs={d.recentJobs} backTo={backTo} />}
           </Panel>
         </div>
       )}

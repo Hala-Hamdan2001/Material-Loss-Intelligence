@@ -286,6 +286,8 @@ export interface Dashboard {
   yieldPercent: number;
   scrapPercent: number;
   recentJobs: Job[];
+  /** Latest six valid closed jobs in the selected date range, newest closure first; descriptive comparison, not a matched baseline. */
+  performanceJobs: Job[];
   attentionJobs: Job[];
   scrapReasons: ReasonTotal[];
 }

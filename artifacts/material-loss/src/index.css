@@ -85,35 +85,35 @@
   --elevate-2: rgba(0, 0, 0, 0.08);
 
   
-  --background: 214 32% 97%;
-  --foreground: 220 39% 13%;
-  --border: 216 24% 87%;
-  --card: 210 40% 99.5%;
+  --background: 210 33% 97%;
+  --foreground: 219 45% 12%;
+  --border: 214 26% 88%;
+  --card: 210 50% 99.6%;
   --card-foreground: 220 39% 13%;
-  --card-border: 216 24% 88%;
-  --sidebar: 222 64% 20%;
-  --sidebar-foreground: 214 40% 94%;
-  --sidebar-border: 222 50% 27%;
-  --sidebar-primary: 214 90% 70%;
-  --sidebar-primary-foreground: 222 64% 15%;
-  --sidebar-accent: 222 52% 27%;
-  --sidebar-accent-foreground: 0 0% 99%;
-  --sidebar-ring: 214 90% 70%;
-  --popover: 210 40% 99.5%;
+  --card-border: 214 28% 89%;
+  --sidebar: 220 58% 13%;
+  --sidebar-foreground: 213 35% 90%;
+  --sidebar-border: 219 42% 22%;
+  --sidebar-primary: 173 58% 50%;
+  --sidebar-primary-foreground: 220 58% 11%;
+  --sidebar-accent: 219 45% 20%;
+  --sidebar-accent-foreground: 210 40% 98%;
+  --sidebar-ring: 173 58% 50%;
+  --popover: 210 50% 99.6%;
   --popover-foreground: 220 39% 13%;
-  --popover-border: 216 24% 86%;
-  --primary: 222 72% 30%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 216 30% 92%;
+  --popover-border: 214 26% 86%;
+  --primary: 219 64% 24%;
+  --primary-foreground: 210 45% 98%;
+  --secondary: 212 30% 93%;
   --secondary-foreground: 220 39% 16%;
-  --muted: 216 28% 93%;
-  --muted-foreground: 218 16% 38%;
-  --accent: 216 50% 93%;
-  --accent-foreground: 222 72% 26%;
+  --muted: 212 30% 94.5%;
+  --muted-foreground: 217 17% 38%;
+  --accent: 176 38% 93%;
+  --accent-foreground: 180 68% 20%;
   --destructive: 0 70% 44%;
   --destructive-foreground: 0 0% 99%;
-  --input: 216 22% 80%;
-  --ring: 222 72% 40%;
+  --input: 214 22% 80%;
+  --ring: 176 70% 32%;
   --chart-1: 145 58% 31%;
   --chart-2: 0 70% 46%;
   --chart-3: 178 64% 29%;
@@ -127,25 +127,25 @@
   --app-font-sans: 'IBM Plex Sans', 'IBM Plex Sans Arabic', sans-serif;
   --app-font-serif: Georgia, serif;
   --app-font-mono: 'IBM Plex Mono', ui-monospace, monospace;
-  --radius: 0.375rem; /* 8px */
-  --shadow-2xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0); /*replace with H S L */
-  --shadow-xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0); /*replace with H S L */
+  --radius: 0.625rem; /* 8px */
+  --shadow-2xs: 0px 2px 0px 0px hsl(219 45% 20% / 0.06); /*replace with H S L */
+  --shadow-xs: 0px 2px 0px 0px hsl(219 45% 20% / 0.06); /*replace with H S L */
   --shadow-sm:
-    0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
-    0px 1px 2px -1px hsl(202.8169 89.1213% 53.1373% / 0);
+    0px 2px 0px 0px hsl(219 45% 20% / 0.06),
+    0px 1px 2px -1px hsl(219 45% 20% / 0.06);
   --shadow:
-    0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
-    0px 1px 2px -1px hsl(202.8169 89.1213% 53.1373% / 0);
+    0px 2px 0px 0px hsl(219 45% 20% / 0.06),
+    0px 1px 2px -1px hsl(219 45% 20% / 0.06);
   --shadow-md:
-    0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
-    0px 2px 4px -1px hsl(202.8169 89.1213% 53.1373% / 0);
+    0px 2px 0px 0px hsl(219 45% 20% / 0.06),
+    0px 2px 4px -1px hsl(219 45% 20% / 0.06);
   --shadow-lg:
-    0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
-    0px 4px 6px -1px hsl(202.8169 89.1213% 53.1373% / 0);
+    0px 2px 0px 0px hsl(219 45% 20% / 0.06),
+    0px 4px 6px -1px hsl(219 45% 20% / 0.06);
   --shadow-xl:
-    0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
-    0px 8px 10px -1px hsl(202.8169 89.1213% 53.1373% / 0);
-  --shadow-2xl: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0);
+    0px 2px 0px 0px hsl(219 45% 20% / 0.06),
+    0px 8px 10px -1px hsl(219 45% 20% / 0.06);
+  --shadow-2xl: 0px 2px 0px 0px hsl(219 45% 20% / 0.06);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
@@ -214,35 +214,35 @@
   /* Used as the border around inputs. Dark mode: Should be a border that is light enough to have high contrast when rendered on a --card background. More contrast than standard --border */
 
   
-  --background: 214 32% 97%;
-  --foreground: 220 39% 13%;
-  --border: 216 24% 87%;
-  --card: 210 40% 99.5%;
+  --background: 210 33% 97%;
+  --foreground: 219 45% 12%;
+  --border: 214 26% 88%;
+  --card: 210 50% 99.6%;
   --card-foreground: 220 39% 13%;
-  --card-border: 216 24% 88%;
-  --sidebar: 222 64% 20%;
-  --sidebar-foreground: 214 40% 94%;
-  --sidebar-border: 222 50% 27%;
-  --sidebar-primary: 214 90% 70%;
-  --sidebar-primary-foreground: 222 64% 15%;
-  --sidebar-accent: 222 52% 27%;
-  --sidebar-accent-foreground: 0 0% 99%;
-  --sidebar-ring: 214 90% 70%;
-  --popover: 210 40% 99.5%;
+  --card-border: 214 28% 89%;
+  --sidebar: 220 58% 13%;
+  --sidebar-foreground: 213 35% 90%;
+  --sidebar-border: 219 42% 22%;
+  --sidebar-primary: 173 58% 50%;
+  --sidebar-primary-foreground: 220 58% 11%;
+  --sidebar-accent: 219 45% 20%;
+  --sidebar-accent-foreground: 210 40% 98%;
+  --sidebar-ring: 173 58% 50%;
+  --popover: 210 50% 99.6%;
   --popover-foreground: 220 39% 13%;
-  --popover-border: 216 24% 86%;
-  --primary: 222 72% 30%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 216 30% 92%;
+  --popover-border: 214 26% 86%;
+  --primary: 219 64% 24%;
+  --primary-foreground: 210 45% 98%;
+  --secondary: 212 30% 93%;
   --secondary-foreground: 220 39% 16%;
-  --muted: 216 28% 93%;
-  --muted-foreground: 218 16% 38%;
-  --accent: 216 50% 93%;
-  --accent-foreground: 222 72% 26%;
+  --muted: 212 30% 94.5%;
+  --muted-foreground: 217 17% 38%;
+  --accent: 176 38% 93%;
+  --accent-foreground: 180 68% 20%;
   --destructive: 0 70% 44%;
   --destructive-foreground: 0 0% 99%;
-  --input: 216 22% 80%;
-  --ring: 222 72% 40%;
+  --input: 214 22% 80%;
+  --ring: 176 70% 32%;
   --chart-1: 145 58% 31%;
   --chart-2: 0 70% 46%;
   --chart-3: 178 64% 29%;
@@ -253,24 +253,24 @@
   --reusable: 178 64% 29%;
   --rework: 36 92% 46%;
   --rework-ink: 30 85% 30%;
-  --shadow-2xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0);
-  --shadow-xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0);
+  --shadow-2xs: 0px 2px 0px 0px hsl(219 45% 20% / 0.06);
+  --shadow-xs: 0px 2px 0px 0px hsl(219 45% 20% / 0.06);
   --shadow-sm:
-    0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
-    0px 1px 2px -1px hsl(202.8169 89.1213% 53.1373% / 0);
+    0px 2px 0px 0px hsl(219 45% 20% / 0.06),
+    0px 1px 2px -1px hsl(219 45% 20% / 0.06);
   --shadow:
-    0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
-    0px 1px 2px -1px hsl(202.8169 89.1213% 53.1373% / 0);
+    0px 2px 0px 0px hsl(219 45% 20% / 0.06),
+    0px 1px 2px -1px hsl(219 45% 20% / 0.06);
   --shadow-md:
-    0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
-    0px 2px 4px -1px hsl(202.8169 89.1213% 53.1373% / 0);
+    0px 2px 0px 0px hsl(219 45% 20% / 0.06),
+    0px 2px 4px -1px hsl(219 45% 20% / 0.06);
   --shadow-lg:
-    0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
-    0px 4px 6px -1px hsl(202.8169 89.1213% 53.1373% / 0);
+    0px 2px 0px 0px hsl(219 45% 20% / 0.06),
+    0px 4px 6px -1px hsl(219 45% 20% / 0.06);
   --shadow-xl:
-    0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
-    0px 8px 10px -1px hsl(202.8169 89.1213% 53.1373% / 0);
-  --shadow-2xl: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0);
+    0px 2px 0px 0px hsl(219 45% 20% / 0.06),
+    0px 8px 10px -1px hsl(219 45% 20% / 0.06);
+  --shadow-2xl: 0px 2px 0px 0px hsl(219 45% 20% / 0.06);
 }
 
 @layer base {
@@ -398,3 +398,9 @@
 html[lang="ar"] body { font-family: 'IBM Plex Sans Arabic', 'IBM Plex Sans', sans-serif; }
 .tnum { font-variant-numeric: tabular-nums; }
 html, body { overflow-x: hidden; }
+
+.focus-ring:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.rise { animation: rise .35s cubic-bezier(.2,.7,.2,1) both; }
+@media (prefers-reduced-motion: reduce) { .rise { animation: none; } }
+.recharts-wrapper text { font-family: var(--app-font-sans); }

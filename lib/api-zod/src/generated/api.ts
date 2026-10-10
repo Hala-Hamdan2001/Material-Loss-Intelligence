@@ -97,6 +97,23 @@ export const getDashboardResponseRecentJobsItemOneReworkMax = 100000000;
 export const getDashboardResponseRecentJobsItemOneScrapEntriesItemWeightMin = 0;
 export const getDashboardResponseRecentJobsItemOneScrapEntriesItemWeightMax = 100000000;
 
+export const getDashboardResponsePerformanceJobsItemOneReferenceMax = 80;
+
+export const getDashboardResponsePerformanceJobsItemOneIssuedMin = 0;
+export const getDashboardResponsePerformanceJobsItemOneIssuedMax = 100000000;
+
+export const getDashboardResponsePerformanceJobsItemOneGoodMin = 0;
+export const getDashboardResponsePerformanceJobsItemOneGoodMax = 100000000;
+
+export const getDashboardResponsePerformanceJobsItemOneReusableMin = 0;
+export const getDashboardResponsePerformanceJobsItemOneReusableMax = 100000000;
+
+export const getDashboardResponsePerformanceJobsItemOneReworkMin = 0;
+export const getDashboardResponsePerformanceJobsItemOneReworkMax = 100000000;
+
+export const getDashboardResponsePerformanceJobsItemOneScrapEntriesItemWeightMin = 0;
+export const getDashboardResponsePerformanceJobsItemOneScrapEntriesItemWeightMax = 100000000;
+
 export const getDashboardResponseAttentionJobsItemOneReferenceMax = 80;
 
 export const getDashboardResponseAttentionJobsItemOneIssuedMin = 0;
@@ -170,6 +187,50 @@ export const GetDashboardResponse = zod.object({
   "createdBy": zod.string().nullable(),
   "assignedTo": zod.string().nullable()
 }))),
+  "performanceJobs": zod.array(zod.object({
+  "reference": zod.string().min(1).max(getDashboardResponsePerformanceJobsItemOneReferenceMax),
+  "product": zod.string(),
+  "material": zod.string(),
+  "machine": zod.string(),
+  "issued": zod.number().min(getDashboardResponsePerformanceJobsItemOneIssuedMin).max(getDashboardResponsePerformanceJobsItemOneIssuedMax),
+  "good": zod.number().min(getDashboardResponsePerformanceJobsItemOneGoodMin).max(getDashboardResponsePerformanceJobsItemOneGoodMax),
+  "reusable": zod.number().min(getDashboardResponsePerformanceJobsItemOneReusableMin).max(getDashboardResponsePerformanceJobsItemOneReusableMax),
+  "rework": zod.number().min(getDashboardResponsePerformanceJobsItemOneReworkMin).max(getDashboardResponsePerformanceJobsItemOneReworkMax),
+  "scrapEntries": zod.array(zod.object({
+  "reason": zod.string(),
+  "weight": zod.number().min(getDashboardResponsePerformanceJobsItemOneScrapEntriesItemWeightMin).max(getDashboardResponsePerformanceJobsItemOneScrapEntriesItemWeightMax)
+})),
+  "notes": zod.string()
+}).and(zod.object({
+  "id": zod.string(),
+  "status": zod.enum(['draft', 'closed']),
+  "revision": zod.number().int(),
+  "createdAt": zod.string(),
+  "closedAt": zod.string().nullable(),
+  "isDemo": zod.boolean(),
+  "tolerance": zod.number(),
+  "metrics": zod.object({
+  "scrap": zod.number(),
+  "accounted": zod.number(),
+  "residual": zod.number(),
+  "yieldPercent": zod.number(),
+  "scrapPercent": zod.number(),
+  "reusablePercent": zod.number(),
+  "reworkPercent": zod.number(),
+  "balanced": zod.boolean(),
+  "largestReason": zod.string(),
+  "largestWeight": zod.number(),
+  "largestContribution": zod.number()
+}),
+  "signals": zod.array(zod.enum(['high_scrap', 'above_baseline', 'insufficient_history'])),
+  "investigationNotes": zod.array(zod.object({
+  "id": zod.string(),
+  "text": zod.string(),
+  "createdAt": zod.string()
+})),
+  "createdBy": zod.string().nullable(),
+  "assignedTo": zod.string().nullable()
+}))).describe('Latest six valid closed jobs in the selected date range, newest closure first; descriptive comparison, not a matched baseline.'),
   "attentionJobs": zod.array(zod.object({
   "reference": zod.string().min(1).max(getDashboardResponseAttentionJobsItemOneReferenceMax),
   "product": zod.string(),

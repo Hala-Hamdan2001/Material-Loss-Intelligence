@@ -13,6 +13,7 @@ import { allJobs, getJob, workspace, workspaceView, fail, writeValues, validateI
 import insightRouter from "./material-insights";
 import accessRouter from "./workspace-access";
 import { mutate, requireManager, jobScope } from "../lib/permissions";
+import { performanceJobs } from "../lib/dashboard-performance";
 
 const router: IRouter = Router();
 router.use(accessRouter);
@@ -59,7 +60,7 @@ router.get("/dashboard", async (req,res) => {
     const date = (j.closedAt ?? j.createdAt).slice(0,10);
     return (!from || date >= from) && (!to || date <= to);
   });
-  res.json(GetDashboardResponse.parse({ ...aggregate(filtered), recentJobs: filtered.slice(0,6),
+  res.json(GetDashboardResponse.parse({ ...aggregate(filtered), recentJobs: filtered.slice(0,6), performanceJobs: performanceJobs(filtered),
     attentionJobs: filtered.filter(j => j.status === "closed" && j.signals.some(s => s !== "insufficient_history")) }));
 });
 router.get("/jobs", async (req,res) => {

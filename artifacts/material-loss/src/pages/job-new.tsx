@@ -5,7 +5,10 @@ import { useCreateJob, useCloseJob, useGetWorkspace, type JobInput } from '@work
 import { PageHeader } from '@/components/bits';
 import { JobForm, emptyForm } from '@/components/job-form';
 import { useToast } from '@/hooks/use-toast';
-import { errorCode, useErrorText, useInvalidateBusiness } from '@/lib/format';
+import { errorCode, useErrorText, useInvalidateBusiness, hasDirtyDraft } from '@/lib/format';
+import { useBackTarget } from '@/hooks/use-nav';
+import { withBack } from '@/lib/nav';
+import { BackLink } from '@/components/back-link';
 
 export default function JobNew() {
   const { t } = useTranslation();
@@ -18,6 +21,7 @@ export default function JobNew() {
   const [serverError, setServerError] = useState<string | null>(null);
   const create = useCreateJob();
   const close = useCloseJob();
+  const back = useBackTarget();
 
   const onSubmit = (input: JobInput, andClose: boolean) => {
     setServerError(null);
@@ -28,7 +32,7 @@ export default function JobNew() {
           void invalidate();
           if (!andClose) {
             toast({ title: t('form.created') });
-            navigate(`/jobs/${job.id}`);
+            navigate(withBack(`/jobs/${job.id}`, back));
             return;
           }
           close.mutate(
@@ -37,11 +41,11 @@ export default function JobNew() {
               onSuccess: () => {
                 void invalidate();
                 toast({ title: t('form.closed') });
-                navigate(`/jobs/${job.id}`);
+                navigate(withBack(`/jobs/${job.id}`, back));
               },
               onError: (e) => {
                 toast({ title: t('form.created'), description: errText(e), variant: 'destructive' });
-                navigate(`/jobs/${job.id}/edit`);
+                navigate(withBack(`/jobs/${job.id}/edit`, back));
               },
             },
           );
@@ -53,6 +57,7 @@ export default function JobNew() {
 
   return (
     <div>
+      <BackLink />
       <PageHeader title={t('form.newTitle')} subtitle={t('form.newSubtitle')} />
       <JobForm
         initial={initial}
@@ -60,7 +65,7 @@ export default function JobNew() {
         pending={create.isPending || close.isPending}
         serverError={serverError ? t(serverError) : null}
         onSubmit={onSubmit}
-        onCancel={() => navigate('/jobs')}
+        onCancel={() => { if (!hasDirtyDraft() || window.confirm(t('nav.leave'))) navigate(back ?? '/jobs'); }}
         allowClose={ws.data?.role !== 'worker'}
       />
     </div>

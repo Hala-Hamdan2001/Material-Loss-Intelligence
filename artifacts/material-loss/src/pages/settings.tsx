@@ -221,7 +221,7 @@ function MembersPanel({ me }: { me: string | null }) {
 
   const row = (mb: Member) => (
     <li key={mb.userId} className="flex flex-wrap items-center gap-2 px-3 py-2 text-sm" data-testid={`row-member-${mb.userId}`}>
-      <span dir="ltr" className="min-w-0 flex-1 break-all font-mono text-xs">{mb.userId}{mb.userId === me && <span className="font-sans text-muted-foreground"> ({t('roles.you')})</span>}</span>
+      <span dir="ltr" className="min-w-0 basis-full break-all font-mono text-xs sm:basis-auto sm:flex-1">{mb.userId}{mb.userId === me && <span className="font-sans text-muted-foreground"> ({t('roles.you')})</span>}</span>
       <span className="text-xs">{t(`roles.${mb.role}`)}</span>
       <span className={`text-xs ${mb.active ? 'text-good' : 'text-scrap'}`}>{mb.active ? t('roles.active') : t('roles.revoked')}</span>
       <div className="flex gap-1">

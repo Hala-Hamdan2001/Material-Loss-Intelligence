@@ -1655,6 +1655,13 @@
               "$ref": "#/components/schemas/Job"
             }
           },
+          "performanceJobs": {
+            "type": "array",
+            "description": "Latest six valid closed jobs in the selected date range, newest closure first; descriptive comparison, not a matched baseline.",
+            "items": {
+              "$ref": "#/components/schemas/Job"
+            }
+          },
           "attentionJobs": {
             "type": "array",
             "items": {
@@ -1679,6 +1686,7 @@
           "yieldPercent",
           "scrapPercent",
           "recentJobs",
+          "performanceJobs",
           "attentionJobs",
           "scrapReasons"
         ]

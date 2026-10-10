@@ -6,8 +6,11 @@ import { Button } from '@/components/ui/button';
 import { PageHeader, ErrorState, LoadingBlock, EmptyState } from '@/components/bits';
 import { JobForm, formFromJob } from '@/components/job-form';
 import { useToast } from '@/hooks/use-toast';
-import { errorCode, useErrorText, useInvalidateBusiness, useFmt } from '@/lib/format';
+import { errorCode, useErrorText, useInvalidateBusiness, useFmt, hasDirtyDraft } from '@/lib/format';
 import { Lock } from 'lucide-react';
+import { useBackTarget } from '@/hooks/use-nav';
+import { withBack } from '@/lib/nav';
+import { BackLink } from '@/components/back-link';
 
 export default function JobEdit() {
   const { id = '' } = useParams<{ id: string }>();
@@ -23,11 +26,13 @@ export default function JobEdit() {
   const ws = useGetWorkspace();
   const [serverError, setServerError] = useState<{ msg: string; stale: boolean } | null>(null);
   const [formKey, setFormKey] = useState(0);
+  const back = useBackTarget();
+  const detailHref = (jid: string) => withBack(`/jobs/${jid}`, back);
 
   if (q.isLoading) return <LoadingBlock rows={8} />;
   if (q.isError || !q.data) {
     return errorCode(q.error) === 'NOT_FOUND' ? (
-      <EmptyState icon={<Lock className="h-5 w-5" aria-hidden />} title={t('detail.notFound')} desc={t('detail.notFoundDesc')} action={<Button asChild variant="outline"><Link href="/jobs">{t('detail.back')}</Link></Button>} />
+      <EmptyState icon={<Lock className="h-5 w-5" aria-hidden />} title={t('detail.notFound')} desc={t('detail.notFoundDesc')} action={<Button asChild variant="outline"><Link href={back ?? '/jobs'}>{t('detail.back')}</Link></Button>} />
     ) : (
       <ErrorState message={`${t('detail.error')} ${errText(q.error)}`} onRetry={() => void q.refetch()} />
     );
@@ -38,7 +43,7 @@ export default function JobEdit() {
       <EmptyState
         icon={<Lock className="h-5 w-5" aria-hidden />}
         title={t('form.closedNotice')}
-        action={<Button asChild><Link href={`/jobs/${job.id}`} data-testid="link-to-job">{t('form.toJob')}</Link></Button>}
+        action={<Button asChild><Link href={detailHref(job.id)} data-testid="link-to-job">{t('form.toJob')}</Link></Button>}
       />
     );
   }
@@ -54,7 +59,7 @@ export default function JobEdit() {
           void invalidate();
           if (!andClose) {
             toast({ title: t('form.updated') });
-            navigate(`/jobs/${saved.id}`);
+            navigate(detailHref(saved.id));
             return;
           }
           close.mutate(
@@ -63,7 +68,7 @@ export default function JobEdit() {
               onSuccess: () => {
                 void invalidate();
                 toast({ title: t('form.closed') });
-                navigate(`/jobs/${saved.id}`);
+                navigate(detailHref(saved.id));
               },
               onError: onErr,
             },
@@ -76,6 +81,7 @@ export default function JobEdit() {
 
   return (
     <div>
+      <BackLink />
       <PageHeader title={`${t('form.editTitle')} · ${job.reference}`} subtitle={t('form.editSubtitle', { revision: f.num(job.revision) })} />
       <JobForm
         key={`${job.id}-${formKey}`}
@@ -100,7 +106,7 @@ export default function JobEdit() {
           ) : null
         }
         onSubmit={onSubmit}
-        onCancel={() => navigate(`/jobs/${job.id}`)}
+        onCancel={() => { if (!hasDirtyDraft() || window.confirm(t('nav.leave'))) navigate(detailHref(job.id)); }}
         allowClose={ws.data?.role !== 'worker'}
       />
     </div>

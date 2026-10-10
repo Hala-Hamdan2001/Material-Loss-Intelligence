@@ -13,6 +13,7 @@ import { useAuth } from '@workspace/replit-auth-web';
 import { Button } from '@/components/ui/button';
 import { ErrorState } from '@/components/bits';
 import { clearScopedData, errorCode, useErrorText } from '@/lib/format';
+import { setNavScope } from '@/lib/nav';
 import type { ReactNode } from 'react';
 import type { WorkspaceRole } from '@workspace/api-client-react';
 import NotFound from '@/pages/not-found';
@@ -123,6 +124,8 @@ function WorkspaceGate() {
   const lastScope = useRef<string | null>(null);
   // Workspace, account or role changed (including revocation): drop every cached scoped screen.
   if (scope && lastScope.current !== null && lastScope.current !== scope) clearScopedData(qc);
+  // Scroll/back memory is scoped to the same key; any change (switch, sign-out, role or membership change) clears it.
+  setNavScope(scope);
   useEffect(() => { if (scope) lastScope.current = scope; }, [scope]);
   if (forbidden) {
     return (
