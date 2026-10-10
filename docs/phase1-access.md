@@ -67,8 +67,10 @@ populates memberships.
 ## Reproducible development checks
 - `pnpm run typecheck`
 - `pnpm --filter @workspace/material-accounting test`
-- With the managed API workflow running:
-  `pnpm --filter @workspace/scripts exec tsx ../artifacts/api-server/src/tests/permissions.test.ts`
+- Do not run the permission script against the normal app database. It now
+  requires an explicit loopback scratch API and a guarded scratch database name.
+  The local isolation harness builds on a disposable copy and verifies source
+  checksums. See `auth-permissions-audit.md` for current commands and results.
 
 The API suite uses isolated users and session fixtures to exercise the real HTTP
 middleware and permissions. It is not a substitute for testing the actual OIDC
@@ -94,6 +96,7 @@ redirect flow; a browser test is also required for that flow.
   pre-existing records were preserved.
 
 ## Limitations
+The historical results above are supplemented by `auth-permissions-audit.md`.
 Enforcement is application-level, not PostgreSQL row-level security. Someone with
 direct database credentials is outside this authorization boundary. Account-ID
 enrollment has no invitation acceptance/email workflow. Cookie protection uses

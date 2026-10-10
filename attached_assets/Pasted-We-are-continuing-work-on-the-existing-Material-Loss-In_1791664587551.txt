@@ -1,0 +1,95 @@
+We are continuing work on the existing **Material Loss Intelligence** application.
+
+## Objective
+
+Perform a focused final audit of the existing authentication, workspace isolation, and Manager/Worker permissions. Determine exactly what is complete, what remains unverified, and what must be fixed before the application can safely be demonstrated as a real multi-user product.
+
+**Audit first, then fix only confirmed issues within scope. Do not rebuild working features.**
+
+## Critical constraints
+
+* Preserve the existing application architecture, database, records, Demo workspace, Private workspace, UI, and all working functionality.
+* Do not introduce Presentation Mode, simulated role switching, fake login screens, or mock authentication.
+* Do not change the dashboard charts or any existing chart designs.
+* Do not start the Project Management Board or CSV export yet.
+* Do not perform destructive database operations, reset existing data, or run an unverified production migration.
+* Do not weaken security checks to make tests pass.
+* Minimize unnecessary changes and Replit usage.
+
+## Phase 1 — Audit the existing implementation
+
+Inspect the actual current source code, routes, session middleware, database schema, authorization helpers, workspace membership logic, and the existing tests and documentation.
+
+Review the real Replit OIDC authentication flow and determine whether it can be verified in this environment. Do not assume it works simply because permission tests pass.
+
+Verify the following:
+
+### A. Authentication and sessions
+
+1. A real user must authenticate through the existing Replit OIDC flow.
+2. Protected application routes and API endpoints must reject unauthenticated requests.
+3. Expired, invalid, or revoked sessions must not retain access to private data.
+4. User identity and roles must come from trusted server-side session/membership data, never from client-supplied role or identity fields.
+5. Logout and session invalidation must behave correctly.
+6. Clearly distinguish actual verification from code inspection or synthetic-session tests.
+
+### B. Workspace isolation
+
+1. A user must only access workspaces where they have valid membership.
+2. Verify read and write isolation across relevant API endpoints, including jobs, analytics, comparisons, investigations, settings, memberships, and exports if any already exist.
+3. Check direct object-ID access, modified workspace IDs, forged creator/assignee/role fields, and stale or revoked membership.
+4. Ensure switching workspaces or losing access does not expose previously cached private data.
+5. Do not assume that hiding a UI element is sufficient authorization; enforce permissions on the server.
+
+### C. Manager and Worker permissions
+
+Use the existing intended permission rules rather than inventing a new permission model.
+
+* **Manager:** may access the management and analytics functions currently intended for Managers, manage workspace memberships and assignments, and perform permitted job lifecycle actions.
+* **Worker:** may create jobs and edit only drafts they created or are assigned to, according to the existing rules. Workers must not access Manager-only analytics, comparisons, investigation notes, settings changes, membership management, assignment controls, or unauthorized close/reopen actions.
+* Verify behavior for closed jobs, stale revisions, unassigned jobs, revoked assignments, revoked memberships, and cross-workspace requests.
+* Protect the last Manager from accidental or concurrent removal or demotion.
+
+If the current implementation differs from these rules, report the discrepancy before making a potentially disruptive change.
+
+### D. Member onboarding
+
+Inspect how a real second user becomes a workspace member and receives the Worker or Manager role.
+
+Determine whether the current workflow requires a known existing account ID, whether invitations or membership acceptance are implemented, and what is realistically possible with the current Replit authentication setup.
+
+Do not invent a fake invitation workflow or expose account information. Recommend the smallest safe solution if onboarding is incomplete.
+
+## Phase 2 — Fix confirmed, in-scope defects
+
+After the audit, fix only confirmed authentication, authorization, workspace-isolation, or membership-management defects that can be safely addressed without destructive changes.
+
+* Preserve existing records and Demo/Private workspace separation.
+* Add or update focused regression tests for each fix.
+* Keep all current working UI and features intact.
+* Do not claim the application is production-ready based solely on automated tests.
+* If real OIDC authentication cannot be tested here, do not bypass or replace it. Explain exactly what must be verified manually and provide a short reproducible checklist.
+
+If a change requires a risky database migration, unavailable credentials, a second real account, or a production-only environment, stop before making that change and explain the blocker.
+
+## Phase 3 — Final verification and report
+
+Run the relevant existing permission tests, accounting/regression tests, TypeScript checks, and production build where applicable.
+
+Return a concise, evidence-based report containing:
+
+1. **Confirmed working:** what was verified and how.
+2. **Fixed:** each confirmed defect and its regression test.
+3. **Not verified:** especially the real OIDC login/logout flow and actual Worker login if unavailable.
+4. **Remaining blockers:** any limitations in membership onboarding, workspace isolation, or production deployment.
+5. **Manual verification checklist:** exact steps I can perform without creating a fake presentation mode or modifying real data.
+6. **Final readiness assessment:** distinguish between:
+
+   * permission logic tested,
+   * real authentication verified,
+   * real Manager/Worker multi-user workflow verified,
+   * production deployment readiness.
+
+Use explicit evidence. Do not describe synthetic-session tests as successful real-user login tests.
+
+**Success means we know exactly where the real permissions system stands, and all safely fixable defects within scope are fixed — without breaking the existing application.**

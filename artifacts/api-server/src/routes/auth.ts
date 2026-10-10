@@ -7,6 +7,7 @@ import {
 import { db, usersTable } from '@workspace/db';
 import { Router, type IRouter, type Request, type Response } from 'express';
 import * as oidc from 'openid-client';
+import { getSafeReturnTo } from '../lib/auth-return';
 
 import {
   clearSession,
@@ -49,17 +50,6 @@ function setOidcCookie(res: Response, name: string, value: string) {
     path: '/',
     maxAge: OIDC_COOKIE_TTL,
   });
-}
-
-function getSafeReturnTo(value: unknown): string {
-  if (
-    typeof value !== 'string' ||
-    !value.startsWith('/') ||
-    value.startsWith('//')
-  ) {
-    return '/';
-  }
-  return value;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -162,17 +152,16 @@ router.get('/login', async (req: Request, res: Response) => {
 // Query params are not validated because the OIDC provider may include
 // parameters not expressed in the schema.
 router.get('/callback', async (req: Request, res: Response) => {
-  const config = await getOidcConfig();
-  const callbackUrl = `${getOrigin(req)}/api/callback`;
-
   const codeVerifier = req.cookies?.code_verifier;
   const nonce = req.cookies?.nonce;
   const expectedState = req.cookies?.state;
 
-  if (!codeVerifier || !expectedState) {
+  if (!codeVerifier || !expectedState || !nonce) {
     res.redirect('/api/login');
     return;
   }
+  const config = await getOidcConfig();
+  const callbackUrl = `${getOrigin(req)}/api/callback`;
 
   const currentUrl = new URL(
     `${callbackUrl}?${new URL(req.url, `http://${req.headers.host}`).searchParams}`,
@@ -228,20 +217,22 @@ router.get('/callback', async (req: Request, res: Response) => {
 router.get('/logout', async (req: Request, res: Response) => {
   res.clearCookie('mli_mode', { path: '/' });
   res.clearCookie('mli_workspace', { path: '/' });
-  const config = await getOidcConfig();
-  const origin = getOrigin(req);
   const returnTo = getSafeReturnTo(req.query.returnTo);
-  const postLogoutRedirectUrl = new URL(returnTo, `${origin}/`).href;
-
   const sid = getSessionId(req);
   await clearSession(res, sid);
-
-  const endSessionUrl = oidc.buildEndSessionUrl(config, {
-    client_id: process.env.REPL_ID!,
-    post_logout_redirect_uri: postLogoutRedirectUrl,
-  });
-
-  res.redirect(endSessionUrl.href);
+  // Local invalidation must succeed even if provider discovery/logout is unavailable.
+  try {
+    const config = await getOidcConfig();
+    const postLogoutRedirectUrl = new URL(returnTo, `${getOrigin(req)}/`).href;
+    const endSessionUrl = oidc.buildEndSessionUrl(config, {
+      client_id: process.env.REPL_ID!,
+      post_logout_redirect_uri: postLogoutRedirectUrl,
+    });
+    res.redirect(endSessionUrl.href);
+  } catch {
+    req.log.warn('Provider logout unavailable; local session has been invalidated');
+    res.redirect(returnTo);
+  }
 });
 
 router.post(

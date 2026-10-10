@@ -8,7 +8,13 @@ import { randomUUID, randomBytes } from "node:crypto";
 import { pool } from "@workspace/db";
 
 if (process.env.NODE_ENV === "production") throw new Error("Development-only test; refused in production.");
-const base = "http://localhost:80/api";
+const base = process.env.TEST_API_BASE;
+if (!base || !/^http:\/\/127\.0\.0\.1:\d+\/api$/.test(base)) throw new Error("Explicit loopback scratch API required.");
+const database = await pool.query("SELECT current_database() AS name");
+if (!/^mli_phase_a_\d+_\d+$/.test(database.rows[0].name)) {
+  await pool.end();
+  throw new Error("Refusing writes outside a uniquely named scratch database.");
+}
 const ids = Array.from({length:4},()=>`phase1-test-${randomUUID()}`);
 const organizations = new Set<string>();
 const sessions: string[] = [];
@@ -26,7 +32,8 @@ class Client {
       const [key,...value] = raw.split(";")[0]!.split("=");
       this.cookies.set(key!,value.join("="));
     }
-    const data = await response.json();
+    const data = response.headers.get("content-type")?.includes("application/json")
+      ? await response.json() : { redirect: response.headers.get("location") };
     assert.ok((Array.isArray(expected) ? expected : [expected]).includes(response.status),`${method} ${path} (${response.status}): ${JSON.stringify(data)}`);
     return data;
   }
@@ -54,15 +61,43 @@ try {
   const exp = await session(ids[0]!,true);
   await exp.call("/workspaces","GET",undefined,401);
   verify("anonymous and expired sessions denied private access",()=>{});
+  await new Client(randomBytes(32).toString("hex")).call("/workspaces","GET",undefined,401);
+  const dbExpired = await session(ids[0]!);
+  await pool.query("UPDATE sessions SET expire=now()-interval '1 second' WHERE sid=$1",[dbExpired.token]);
+  await dbExpired.call("/workspaces","GET",undefined,401);
+  const revoked = await session(ids[0]!);
+  await pool.query("DELETE FROM sessions WHERE sid=$1",[revoked.token]);
+  await revoked.call("/workspaces","GET",undefined,401);
+  verify("invalid, database-expired and deleted sessions denied",()=>{});
+  const logoutClient = await session(ids[0]!);
+  const loggedOut = await logoutClient.call("/logout?returnTo=%2F%5Cattacker.example","GET",undefined,302);
+  assert.equal(loggedOut.redirect,"/");
+  await logoutClient.call("/workspaces","GET",undefined,401);
+  const remainingSession = await pool.query("SELECT sid FROM sessions WHERE sid=$1",[logoutClient.token]);
+  assert.equal(remainingSession.rowCount,0);
+  verify("web logout deletes session despite unavailable provider and rejects external return path",()=>{});
+  const mobileLogout = await session(ids[0]!);
+  await mobileLogout.call("/mobile-auth/logout","POST",{});
+  await mobileLogout.call("/workspaces","GET",undefined,401);
+  const callback = new Client();
+  callback.cookies.set("state","not-a-real-state");
+  callback.cookies.set("code_verifier","not-a-real-verifier");
+  assert.equal((await callback.call("/callback?code=invalid","GET",undefined,302)).redirect,"/api/login");
+  verify("mobile logout invalidates session; callback without nonce rejected before provider use",()=>{});
   const org = await manager.call("/workspace","POST",{mode:"private"}); organizations.add(org.id);
   const other = await outsider.call("/workspace","POST",{mode:"private"}); organizations.add(other.id);
   verify("new private owner is Manager only in own workspace",()=>assert.equal(org.role,"manager"));
+  anon.cookies.set("mli_mode","private"); anon.cookies.set("mli_workspace",org.id);
+  for (const path of ["/workspace","/jobs","/dashboard","/workspace/members","/reference-data"])
+    await anon.call(path,"GET",undefined,401);
+  verify("forged private-selection cookies do not authenticate anonymous API requests",()=>{});
   await worker.call("/workspace","POST",{mode:"private",workspaceId:org.id},403);
   await manager.call("/workspace/members","POST",{userId:ids[1],role:"worker",active:true});
   await manager.call("/workspace/members","POST",{userId:ids[3],role:"worker",active:true});
   await worker.call("/workspace","POST",{mode:"private",workspaceId:org.id});
   await otherWorker.call("/workspace","POST",{mode:"private",workspaceId:org.id});
   await manager.call("/workspace/members","POST",{userId:ids[0],role:"worker",active:true},409);
+  await manager.call("/workspace/members","POST",{userId:ids[0],role:"manager",active:false},409);
   await worker.call("/workspace/members","POST",{userId:ids[1],role:"manager",active:true},403);
   verify("manager membership provisioning, no self-promotion, last Manager protected",()=>{});
   const legacy = await manager.call("/jobs","POST",input,201);
@@ -74,6 +109,22 @@ try {
   await outsider.call(`/jobs/${legacy.id}`,"GET",undefined,404);
   await otherWorker.call(`/jobs/${workerJob.id}`,"GET",undefined,404);
   verify("same-workspace unassigned and cross-workspace records hidden",()=>{});
+  for (const [path,method,data] of [
+    [`/jobs/${legacy.id}`,"PATCH",{...input,revision:legacy.revision}],
+    [`/jobs/${legacy.id}/close`,"POST",{revision:legacy.revision}],
+    [`/jobs/${legacy.id}/reopen`,"POST",{revision:legacy.revision,reason:"foreign"}],
+    [`/jobs/${legacy.id}/notes`,"POST",{text:"foreign"}],
+    [`/jobs/${legacy.id}/assignment`,"POST",{assignedTo:null,revision:legacy.revision}],
+    [`/jobs/${legacy.id}/comparison`,"GET",undefined],
+    [`/jobs/${legacy.id}/insights`,"POST",{language:"en",comparisonId:""}],
+  ] as const) await outsider.call(path,method,data,404);
+  outsider.cookies.set("mli_workspace",org.id);
+  for (const path of ["/jobs","/dashboard","/workspace/members","/reference-data"])
+    await outsider.call(path,"GET",undefined,403);
+  await outsider.call("/workspace/settings","PATCH",{tolerance:1,highScrapThreshold:20},403);
+  await outsider.call("/workspace/members","POST",{userId:ids[2],role:"manager",active:true},403);
+  outsider.cookies.set("mli_workspace",other.id);
+  verify("cross-workspace lifecycle, investigations, assignment and forged workspace cookies denied",()=>{});
   for (const path of ["/dashboard",`/jobs/${workerJob.id}/comparison`,"/workspace/members"]) await worker.call(path,"GET",undefined,403);
   for (const [path,data] of [
     ["/workspace/settings",{tolerance:1,highScrapThreshold:20}],
@@ -91,7 +142,9 @@ try {
   verify("assigned worker sees job but no investigation notes or management signals",()=>{
     assert.deepEqual(visible.investigationNotes,[]); assert.deepEqual(visible.signals,[]);
   });
-  const edited = await worker.call(`/jobs/${legacy.id}`,"PATCH",{...input,notes:"Updated by assigned worker",revision:visible.revision});
+  const edited = await worker.call(`/jobs/${legacy.id}`,"PATCH",{...input,notes:"Updated by assigned worker",revision:visible.revision,
+    createdBy:ids[1],assignedTo:ids[2],organizationId:other.id,status:"closed",role:"manager"});
+  assert.equal(edited.createdBy,ids[0]); assert.equal(edited.assignedTo,ids[1]); assert.equal(edited.status,"draft");
   await worker.call(`/jobs/${legacy.id}`,"PATCH",{...input,revision:visible.revision},409);
   await manager.call(`/jobs/${legacy.id}/assignment`,"POST",{assignedTo:ids[2],revision:edited.revision},400);
   await manager.call(`/jobs/${legacy.id}/assignment`,"POST",{assignedTo:null,revision:edited.revision});
@@ -156,11 +209,11 @@ try {
   await manager.call("/workspace/members","POST",{userId:ids[2],role:"manager",active:true});
   await outsider.call("/workspace","POST",{mode:"private",workspaceId:org.id});
   await Promise.all([
-    manager.call("/workspace/members","POST",{userId:ids[2],role:"worker",active:true},[200,403,409]),
+    manager.call("/workspace/members","POST",{userId:ids[2],role:"manager",active:false},[200,403,409]),
     outsider.call("/workspace/members","POST",{userId:ids[0],role:"worker",active:true},[200,403,409]),
   ]);
   const retained = await pool.query("SELECT count(*)::int AS n FROM mli_memberships WHERE organization_id=$1 AND role='manager' AND active",[org.id]);
-  verify("concurrent Manager demotions cannot remove the last Manager",()=>assert.equal(retained.rows[0].n,1));
+  verify("concurrent Manager removal/demotion cannot remove the last Manager",()=>assert.equal(retained.rows[0].n,1));
   console.log(`${checks} permission/regression groups passed.`);
 } finally {
   const client = await pool.connect();
