@@ -59,6 +59,8 @@ Bilingual English/Arabic production-job accounting: record material outcomes, va
 - Do not add runtime schema creation. Update Drizzle schemas and apply changes to the development database.
 - Run API codegen after contract changes. The Zod output deliberately omits duplicate TypeScript schema generation to avoid path/query type-name collisions.
 - Public demo data is not suitable for confidential records; use a signed-in private workspace.
+- Presentation mode is a separate browser-local demonstration, never a real role override or impersonation feature. Keep it free of business/auth API calls and private workspace data.
+- See `docs/presentation.md` for the synthetic presentation script, storage limits, and read-only/no-database test commands.
 - See `docs/phase1-access.md` for enrollment, permission scope, recovery evidence, migration notes, reproducible tests, and limitations.
 
 ## Pointers

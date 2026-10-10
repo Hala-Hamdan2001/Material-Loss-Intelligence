@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import { LayoutGrid, ListChecks, PlusSquare, SlidersHorizontal, Languages, Database, LogIn, LogOut, ChevronDown, Lock, FlaskConical, Users } from 'lucide-react';
+import { LayoutGrid, ListChecks, PlusSquare, SlidersHorizontal, Languages, Database, LogIn, LogOut, ChevronDown, Lock, FlaskConical, Users, MonitorPlay } from 'lucide-react';
 import { useSwitchWorkspace, useListWorkspaces, getGetWorkspaceQueryKey, getListWorkspacesQueryKey, type Workspace } from '@workspace/api-client-react';
 import { useAuth } from '@workspace/replit-auth-web';
 import { Button } from '@/components/ui/button';
@@ -72,7 +72,7 @@ function LanguageButton({ className }: { className?: string }) {
 }
 
 function WorkspaceMenu({ ws }: { ws: Workspace }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, isAuthenticated, login, logout } = useAuth();
   const { go, pending } = useWorkspaceSwitch();
   const list = useListWorkspaces({ query: { enabled: isAuthenticated, queryKey: getListWorkspacesQueryKey(), refetchInterval: 15_000 } });
@@ -120,6 +120,12 @@ function WorkspaceMenu({ ws }: { ws: Workspace }) {
             {t('workspace.switchDemo')}
           </DropdownMenuItem>
         )}
+        <DropdownMenuItem asChild className="min-h-11 lg:min-h-8">
+          <a href={`${import.meta.env.BASE_URL}presentation`} target="_blank" rel="noopener" data-testid="link-presentation-mode">
+            <MonitorPlay className="h-4 w-4" aria-hidden />
+            {i18n.language === 'ar' ? 'وضع العرض التقديمي' : 'Presentation mode'}
+          </a>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         {isAuthenticated ? (
           <DropdownMenuItem className="min-h-11 lg:min-h-8" onSelect={() => logout()} data-testid="menu-logout">

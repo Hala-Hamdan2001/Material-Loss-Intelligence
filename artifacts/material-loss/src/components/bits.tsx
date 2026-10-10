@@ -4,7 +4,7 @@ import { AlertTriangle, TrendingUp, History, CircleDashed, CheckCircle2, RotateC
 import type { Job, JobSignalsItem } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useFmt } from '@/lib/format';
+import { useFmt } from '@/lib/format-shared';
 import { cn } from '@/lib/utils';
 
 export function StatusBadge({ status }: { status: Job['status'] }) {
