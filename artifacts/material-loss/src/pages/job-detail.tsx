@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'wouter';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Pencil, Lock, Unlock, Sparkles, MessageSquareWarning, GitCompare, FileQuestion, Equal, EqualNot } from 'lucide-react';
+import { ArrowLeft, UserCheck, Pencil, Lock, Unlock, Sparkles, MessageSquareWarning, GitCompare, FileQuestion, Equal, EqualNot } from 'lucide-react';
 import {
-  useGetJob, useGetComparison, useCloseJob, useReopenJob, useAddInvestigationNote, useGenerateInsight, useGetWorkspace,
-  getGetJobQueryKey, getGetComparisonQueryKey, type Job, type Insight,
+  useGetJob, useGetComparison, useCloseJob, useReopenJob, useAddInvestigationNote, useGenerateInsight, useGetWorkspace, useListMembers, useAssignJob,
+  getGetJobQueryKey, getListMembersQueryKey, getGetComparisonQueryKey, type Job, type Insight,
 } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -37,6 +37,8 @@ function Detail({ job }: { job: Job }) {
   const f = useFmt();
   const reasonLabel = useReasonLabel();
   const ws = useGetWorkspace();
+  const role = ws.data?.role;
+  const worker = role !== 'demo' && role !== 'manager';
   const m = job.metrics;
   const [comparisonId, setComparisonId] = useState<string | undefined>(undefined);
 
@@ -67,7 +69,7 @@ function Detail({ job }: { job: Job }) {
             <span>{t('detail.revision', { n: f.num(job.revision) })}</span>
           </span>
         }
-        actions={<JobActions job={job} />}
+        actions={<JobActions job={job} worker={worker} />}
       />
 
       <dl className="mb-4 grid grid-cols-1 gap-2 rounded-md border border-card-border bg-card p-3 text-sm sm:grid-cols-3">
@@ -154,22 +156,88 @@ function Detail({ job }: { job: Job }) {
             )}
           </Panel>
 
-          <ComparisonPanel job={job} comparisonId={comparisonId} onSelect={setComparisonId} />
+          {!worker && <ComparisonPanel job={job} comparisonId={comparisonId} onSelect={setComparisonId} />}
         </div>
 
         <div className="min-w-0 space-y-4">
-          <InsightPanel job={job} comparisonId={comparisonId} />
+          {role === 'manager' && <AssignmentPanel job={job} me={ws.data?.userId ?? null} />}
+          {worker && (job.createdBy || job.assignedTo) && (
+            <Panel title={t('roles.assignment')}>
+              <dl className="space-y-1 text-sm">
+                <div><dt className="text-xs text-muted-foreground">{t('roles.createdBy')}</dt><dd dir="ltr" className="break-all font-mono text-xs" data-testid="text-created-by">{job.createdBy ?? t('common.emptyValue')}</dd></div>
+                <div><dt className="text-xs text-muted-foreground">{t('roles.assignedTo')}</dt><dd dir="ltr" className="break-all font-mono text-xs" data-testid="text-assigned-to">{job.assignedTo ?? t('roles.unassigned')}</dd></div>
+              </dl>
+            </Panel>
+          )}
+          {!worker && <InsightPanel job={job} comparisonId={comparisonId} />}
           <Panel title={t('detail.notesOperator')}>
             {job.notes ? <p className="whitespace-pre-wrap text-sm" data-testid="text-notes">{job.notes}</p> : <p className="text-sm text-muted-foreground">{t('detail.noNotes')}</p>}
           </Panel>
-          <NotesPanel job={job} />
+          {!worker && <NotesPanel job={job} />}
         </div>
       </div>
     </div>
   );
 }
 
-function JobActions({ job }: { job: Job }) {
+function AssignmentPanel({ job, me }: { job: Job; me: string | null }) {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const invalidate = useInvalidateBusiness();
+  const members = useListMembers({ query: { queryKey: getListMembersQueryKey(), staleTime: 15_000 } });
+  const assign = useAssignJob();
+  const [value, setValue] = useState(job.assignedTo ?? '');
+  const [err, setErr] = useState<string | null>(null);
+  useEffect(() => { setValue(job.assignedTo ?? ''); }, [job.assignedTo]);
+  const active = (members.data ?? []).filter((mb) => mb.active);
+  const showCurrent = job.assignedTo && !active.some((mb) => mb.userId === job.assignedTo);
+  return (
+    <Panel testId="panel-assignment" title={<span className="flex items-center gap-1.5"><UserCheck className="h-4 w-4 text-primary" aria-hidden />{t('roles.assignment')}</span>}>
+      <p className="mb-2 text-xs text-muted-foreground">
+        {t('roles.createdBy')}: <span dir="ltr" className="break-all font-mono" data-testid="text-created-by">{job.createdBy ?? t('common.emptyValue')}</span>
+      </p>
+      <Label htmlFor="assignee" className="text-xs">{t('roles.assignedTo')}</Label>
+      <select
+        id="assignee"
+        value={value}
+        disabled={members.isLoading}
+        onChange={(e) => setValue(e.target.value)}
+        className="mt-1 h-11 w-full rounded-md border border-input bg-card px-2 font-mono text-sm lg:h-9"
+        data-testid="select-assignee"
+      >
+        <option value="">{t('roles.unassigned')}</option>
+        {showCurrent && <option value={job.assignedTo ?? ''}>{job.assignedTo}</option>}
+        {active.map((mb) => (
+          <option key={mb.userId} value={mb.userId}>
+            {mb.userId}{mb.userId === me ? ` (${t('roles.you')})` : ''} · {t(`roles.${mb.role}`)}
+          </option>
+        ))}
+      </select>
+      {members.isError && <p className="mt-1 text-xs text-scrap">{t('roles.membersError')}</p>}
+      {err && <p role="alert" className="mt-2 rounded-sm bg-scrap/10 px-2 py-1.5 text-xs text-scrap">{t(err)}</p>}
+      <Button
+        variant="outline"
+        className="mt-2 h-11 w-full lg:h-9"
+        disabled={assign.isPending || value === (job.assignedTo ?? '')}
+        data-testid="button-assign"
+        onClick={() => {
+          setErr(null);
+          assign.mutate(
+            { id: job.id, data: { assignedTo: value || null, revision: job.revision } },
+            {
+              onSuccess: () => { void invalidate(); toast({ title: t('roles.assigned') }); },
+              onError: (e) => { setErr(`errors.${errorCode(e)}`); void invalidate(); },
+            },
+          );
+        }}
+      >
+        {assign.isPending ? t('form.saving') : t('roles.assign')}
+      </Button>
+    </Panel>
+  );
+}
+
+function JobActions({ job, worker }: { job: Job; worker: boolean }) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const errText = useErrorText();
@@ -181,6 +249,17 @@ function JobActions({ job }: { job: Job }) {
   const [err, setErr] = useState<string | null>(null);
   const close = useCloseJob();
   const reopen = useReopenJob();
+
+  if (worker) {
+    return job.status === 'draft' ? (
+      <Button asChild variant="outline" className="h-11 lg:h-9">
+        <Link href={`/jobs/${job.id}/edit`} data-testid="button-edit">
+          <Pencil className="h-4 w-4" aria-hidden />
+          {t('common.edit')}
+        </Link>
+      </Button>
+    ) : null;
+  }
 
   if (job.status === 'draft') {
     const missing = missingForClose(job);

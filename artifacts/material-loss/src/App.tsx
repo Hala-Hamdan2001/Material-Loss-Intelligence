@@ -1,5 +1,5 @@
-import { type ReactNode } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useEffect, useRef } from 'react';
+import { QueryCache, QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 import { useGetWorkspace } from '@workspace/api-client-react';
@@ -12,7 +12,9 @@ import { Shell, useWorkspaceSwitch } from '@/components/shell';
 import { useAuth } from '@workspace/replit-auth-web';
 import { Button } from '@/components/ui/button';
 import { ErrorState } from '@/components/bits';
-import { errorCode, useErrorText } from '@/lib/format';
+import { clearScopedData, errorCode, useErrorText } from '@/lib/format';
+import type { ReactNode } from 'react';
+import type { WorkspaceRole } from '@workspace/api-client-react';
 import NotFound from '@/pages/not-found';
 import Dashboard from '@/pages/dashboard';
 import Jobs from '@/pages/jobs';
@@ -21,7 +23,15 @@ import JobDetail from '@/pages/job-detail';
 import JobEdit from '@/pages/job-edit';
 import Settings from '@/pages/settings';
 
-const queryClient = new QueryClient({
+const queryClient: QueryClient = new QueryClient({
+  // Any scoped 403 means role or membership changed: re-check the workspace immediately.
+  queryCache: new QueryCache({
+    onError: (err, query) => {
+      if (query.queryKey[0] !== '/api/workspace' && ['FORBIDDEN', 'UNAUTHORIZED'].includes(errorCode(err))) {
+        void queryClient.invalidateQueries({ queryKey: ['/api/workspace'], exact: true });
+      }
+    },
+  }),
   defaultOptions: {
     queries: {
       staleTime: 30_000,
@@ -36,11 +46,18 @@ const queryClient = new QueryClient({
   },
 });
 
-function Router() {
+function Restricted() {
+  const { t } = useTranslation();
+  return <ErrorState message={t('roles.restricted')} />;
+}
+
+function Router({ role }: { role: WorkspaceRole }) {
+  const worker = role === 'worker';
   return (
     <RoutedErrorBoundary>
       <Switch>
-        <Route path="/" component={Dashboard} />
+        <Route path="/" component={worker ? Jobs : Dashboard} />
+        {worker && <Route path="/dashboard" component={Restricted} />}
         <Route path="/jobs" component={Jobs} />
         <Route path="/jobs/new" component={JobNew} />
         <Route path="/jobs/:id/edit" component={JobEdit} />
@@ -77,10 +94,44 @@ function SessionExpired() {
 }
 
 /** Waits for the workspace (which establishes the demo cookie) before rendering any page. */
+function Forbidden() {
+  const { t } = useTranslation();
+  const { go, pending } = useWorkspaceSwitch();
+  const { logout, isAuthenticated } = useAuth();
+  return (
+    <div role="alert" className="space-y-3 rounded-md border border-scrap/50 bg-scrap/10 p-4 text-sm" data-testid="alert-forbidden">
+      <p className="font-medium">{t('roles.forbidden')}</p>
+      <div className="flex flex-wrap gap-2">
+        <Button disabled={pending} onClick={() => go('private')} data-testid="button-forbidden-own">{t('roles.ownWorkspace')}</Button>
+        <Button variant="outline" disabled={pending} onClick={() => go('demo')} data-testid="button-forbidden-demo">{t('workspace.switchDemo')}</Button>
+        {isAuthenticated && <Button variant="ghost" onClick={() => logout()} data-testid="button-forbidden-logout">{t('workspace.logout')}</Button>}
+      </div>
+    </div>
+  );
+}
+
 function WorkspaceGate() {
   const { t } = useTranslation();
   const errText = useErrorText();
-  const ws = useGetWorkspace({ query: { staleTime: 60_000, queryKey: ['/api/workspace'] } });
+  const qc = useQueryClient();
+  const ws = useGetWorkspace({
+    query: { staleTime: 10_000, refetchInterval: 15_000, refetchIntervalInBackground: false, refetchOnWindowFocus: 'always', queryKey: ['/api/workspace'] },
+  });
+  const forbidden = ws.isError && errorCode(ws.error) === 'FORBIDDEN';
+  const sessionExpired = ws.isError && errorCode(ws.error) === 'UNAUTHORIZED';
+  const scope = forbidden ? 'forbidden' : sessionExpired ? 'expired' : ws.data ? `${ws.data.id}|${ws.data.role}|${ws.data.userId ?? ''}` : null;
+  const lastScope = useRef<string | null>(null);
+  // Workspace, account or role changed (including revocation): drop every cached scoped screen.
+  if (scope && lastScope.current !== null && lastScope.current !== scope) clearScopedData(qc);
+  useEffect(() => { if (scope) lastScope.current = scope; }, [scope]);
+  if (forbidden) {
+    return (
+      <div className="mx-auto max-w-lg px-4 pt-20"><Forbidden /></div>
+    );
+  }
+  if (sessionExpired) {
+    return <div className="mx-auto max-w-lg px-4 pt-20"><SessionExpired /></div>;
+  }
   if (ws.isLoading) {
     return (
       <div className="min-h-[100dvh] bg-background" role="status" aria-label={t('workspace.loading')}>
@@ -106,9 +157,9 @@ function WorkspaceGate() {
   }
   // Keep pages mounted on a background 401 so in-progress drafts are not discarded.
   return (
-    <Shell ws={ws.data}>
+    <Shell key={scope ?? ''} ws={ws.data}>
       {unauthorized && <div className="mb-4"><SessionExpired /></div>}
-      <Router />
+      <Router key={scope ?? ''} role={ws.data.role} />
     </Shell>
   );
 }

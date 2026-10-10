@@ -33,7 +33,7 @@ Bilingual English/Arabic production-job accounting: record material outcomes, va
 ## Architecture decisions
 
 - All weights are kilograms with at most three decimal places; calculations balance integer grams to avoid tolerance-edge rounding errors.
-- Demo browsers receive isolated synthetic workspaces. Real records require sign-in and are owned by the authenticated account; team membership is not part of this MVP.
+- Demo browsers receive isolated synthetic workspaces without sign-in. Private workspaces require active workspace-scoped Manager/Worker membership; demo access never establishes identity.
 - AI selects permitted investigation prompts. Numeric narrative is rendered from validated evidence, preventing invented metrics or unsupported causes.
 - A closed job retains its closure tolerance even if workspace settings later change.
 
@@ -50,12 +50,16 @@ Bilingual English/Arabic production-job accounting: record material outcomes, va
 - Core workflow must remain usable on phones and tablets without horizontal page overflow.
 - Scrap is waste; reusable offcuts and rework are separate outcomes, never scrap.
 - Do not expand into ERP, cutting optimization, offcut inventory, billing, machine integrations, or advanced roles.
+- Preserve the existing unauthenticated demo and its data/functionality when adding private access controls. Do not merge demo records into private workspaces.
+- Accounting status and investigation status must stay independent; investigation must never change calculation, closure-validation, or dashboard metric rules.
+- Before each enhancement phase, verify recoverable code and database state. Run its regression and permission tests before proceeding; stop and explain architectural conflicts before risky changes.
 
 ## Gotchas
 
 - Do not add runtime schema creation. Update Drizzle schemas and apply changes to the development database.
 - Run API codegen after contract changes. The Zod output deliberately omits duplicate TypeScript schema generation to avoid path/query type-name collisions.
 - Public demo data is not suitable for confidential records; use a signed-in private workspace.
+- See `docs/phase1-access.md` for enrollment, permission scope, recovery evidence, migration notes, reproducible tests, and limitations.
 
 ## Pointers
 

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, Scale, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { calculate } from '@workspace/material-accounting';
@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Panel, OutcomeBar } from '@/components/bits';
-import { parseWeight, useFmt, isSystemReason, SELECTABLE_REASONS, missingForClose, useFieldList } from '@/lib/format';
+import { markDraftDirty, parseWeight, useFmt, isSystemReason, SELECTABLE_REASONS, missingForClose, useFieldList } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 type ScrapRow = { key: number; reason: string; custom: boolean; weight: string };
@@ -47,15 +47,24 @@ type Props = {
   serverErrorAction?: React.ReactNode;
   onSubmit: (input: JobInput, close: boolean) => void;
   onCancel: () => void;
+  /** Workers cannot close jobs; hides Save and close. */
+  allowClose?: boolean;
 };
 
-export function JobForm({ initial, tolerance, pending, serverError, serverErrorAction, onSubmit, onCancel }: Props) {
+export function JobForm({ initial, tolerance, pending, serverError, serverErrorAction, onSubmit, onCancel, allowClose = true }: Props) {
   const { t } = useTranslation();
   const f = useFmt();
   const ref = useGetReferenceData({ query: { staleTime: 60_000, queryKey: ['/api/reference-data'] } });
   const [form, setForm] = useState<FormState>(initial);
   const [touched, setTouched] = useState(false);
   const errRef = useRef<HTMLDivElement>(null);
+  const [baseForm] = useState(initial);
+  const dirty = form !== baseForm;
+  useEffect(() => {
+    if (!dirty) return;
+    markDraftDirty(1);
+    return () => markDraftDirty(-1);
+  }, [dirty]);
 
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm((p) => ({ ...p, [k]: v }));
   const setRow = (key: number, patch: Partial<ScrapRow>) => setForm((p) => ({ ...p, scrap: p.scrap.map((r) => (r.key === key ? { ...r, ...patch } : r)) }));
@@ -371,11 +380,13 @@ export function JobForm({ initial, tolerance, pending, serverError, serverErrorA
             <Button className="h-11 lg:h-9" disabled={pending} onClick={() => submit(false)} data-testid="button-save-draft">
               {pending ? t('form.saving') : t('form.saveDraft')}
             </Button>
-            <Button variant="outline" className="h-11 lg:h-9" disabled={pending || !canClose} onClick={() => submit(true)} data-testid="button-save-close">
-              {t('form.saveClose')}
-            </Button>
-            {!canClose && <p className="text-[11px] text-muted-foreground">{t('form.closeBlocked')}</p>}
-            {missing.length > 0 && <p className="text-[11px] text-rework-ink" data-testid="text-close-missing">{t('form.closeMissing', { fields: listFields(missing) })}</p>}
+            {allowClose && (
+              <Button variant="outline" className="h-11 lg:h-9" disabled={pending || !canClose} onClick={() => submit(true)} data-testid="button-save-close">
+                {t('form.saveClose')}
+              </Button>
+            )}
+            {allowClose && !canClose && <p className="text-[11px] text-muted-foreground">{t('form.closeBlocked')}</p>}
+            {allowClose && missing.length > 0 && <p className="text-[11px] text-rework-ink" data-testid="text-close-missing">{t('form.closeMissing', { fields: listFields(missing) })}</p>}
             <Button variant="ghost" className="h-11 lg:h-9" onClick={onCancel} disabled={pending} data-testid="button-cancel">
               {t('form.leave')}
             </Button>

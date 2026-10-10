@@ -158,6 +158,10 @@ export type Job = JobInput & ({
   metrics: Metrics;
   signals: JobSignalsItem[];
   investigationNotes: InvestigationNote[];
+  /** @nullable */
+  createdBy: string | null;
+  /** @nullable */
+  assignedTo: string | null;
 });
 
 export interface Comparison {
@@ -174,12 +178,24 @@ export interface ReasonTotal {
   contribution: number;
 }
 
+export type WorkspaceRole = typeof WorkspaceRole[keyof typeof WorkspaceRole];
+
+
+export const WorkspaceRole = {
+  demo: 'demo',
+  manager: 'manager',
+  worker: 'worker',
+} as const;
+
 export interface Workspace {
   id: string;
   isDemo: boolean;
   tolerance: number;
   highScrapThreshold: number;
   baselineGap: number;
+  role: WorkspaceRole;
+  /** @nullable */
+  userId: string | null;
 }
 
 export type WorkspaceInputMode = typeof WorkspaceInputMode[keyof typeof WorkspaceInputMode];
@@ -192,6 +208,11 @@ export const WorkspaceInputMode = {
 
 export interface WorkspaceInput {
   mode: WorkspaceInputMode;
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  workspaceId?: string;
 }
 
 export interface SettingsInput {
@@ -267,6 +288,58 @@ export interface Dashboard {
   recentJobs: Job[];
   attentionJobs: Job[];
   scrapReasons: ReasonTotal[];
+}
+
+export type MemberRole = typeof MemberRole[keyof typeof MemberRole];
+
+
+export const MemberRole = {
+  manager: 'manager',
+  worker: 'worker',
+} as const;
+
+export interface Member {
+  userId: string;
+  role: MemberRole;
+  active: boolean;
+}
+
+export type MemberInputRole = typeof MemberInputRole[keyof typeof MemberInputRole];
+
+
+export const MemberInputRole = {
+  manager: 'manager',
+  worker: 'worker',
+} as const;
+
+export interface MemberInput {
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  userId: string;
+  role: MemberInputRole;
+  active: boolean;
+}
+
+export interface AssignmentInput {
+  /** @nullable */
+  assignedTo: string | null;
+  /** @minimum 1 */
+  revision: number;
+}
+
+export type WorkspaceChoiceRole = typeof WorkspaceChoiceRole[keyof typeof WorkspaceChoiceRole];
+
+
+export const WorkspaceChoiceRole = {
+  manager: 'manager',
+  worker: 'worker',
+} as const;
+
+export interface WorkspaceChoice {
+  id: string;
+  role: WorkspaceChoiceRole;
 }
 
 export type GetDashboardParams = {

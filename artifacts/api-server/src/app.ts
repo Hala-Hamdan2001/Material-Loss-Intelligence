@@ -37,8 +37,14 @@ app.use((req, res, next) => {
   res.setHeader("Cache-Control", "no-store");
   if (!["GET", "HEAD", "OPTIONS"].includes(req.method)) {
     const origin = req.get("origin");
-    if (origin && new URL(origin).host !== req.get("host") && new URL(origin).host !== req.get("x-forwarded-host")) {
-      res.status(403).json({ error: "UNAUTHORIZED" }); return;
+    if (origin) {
+      let valid = false;
+      try {
+        const parsed = new URL(origin);
+        valid = ["https:", "http:"].includes(parsed.protocol) &&
+          (parsed.host === req.get("host") || parsed.host === req.get("x-forwarded-host"));
+      } catch { /* Reject malformed Origin rather than returning an internal error. */ }
+      if (!valid) { res.status(403).json({ error: "UNAUTHORIZED" }); return; }
     }
   }
   next();

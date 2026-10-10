@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useParams } from 'wouter';
 import { useTranslation } from 'react-i18next';
-import { useGetJob, useUpdateJob, useCloseJob, getGetJobQueryKey, type JobInput } from '@workspace/api-client-react';
+import { useGetWorkspace, useGetJob, useUpdateJob, useCloseJob, getGetJobQueryKey, type JobInput } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
 import { PageHeader, ErrorState, LoadingBlock, EmptyState } from '@/components/bits';
 import { JobForm, formFromJob } from '@/components/job-form';
@@ -20,6 +20,7 @@ export default function JobEdit() {
   const q = useGetJob(id, { query: { enabled: !!id, queryKey: getGetJobQueryKey(id), refetchOnWindowFocus: false } });
   const update = useUpdateJob();
   const close = useCloseJob();
+  const ws = useGetWorkspace();
   const [serverError, setServerError] = useState<{ msg: string; stale: boolean } | null>(null);
   const [formKey, setFormKey] = useState(0);
 
@@ -100,6 +101,7 @@ export default function JobEdit() {
         }
         onSubmit={onSubmit}
         onCancel={() => navigate(`/jobs/${job.id}`)}
+        allowClose={ws.data?.role !== 'worker'}
       />
     </div>
   );

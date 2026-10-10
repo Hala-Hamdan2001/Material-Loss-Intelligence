@@ -79,7 +79,7 @@ export function useReasonLabel() {
 const CODES = [
   'INVALID_INPUT', 'INVALID_WEIGHT', 'REQUIRED_FIELDS', 'ZERO_ISSUED', 'UNBALANCED', 'DUPLICATE_REFERENCE',
   'CLOSED_JOB', 'STALE_REVISION', 'NOT_FOUND', 'UNAUTHORIZED', 'INVALID_COMPARISON', 'NOTE_REQUIRED',
-  'SERVER_ERROR', 'RATE_LIMIT',
+  'SERVER_ERROR', 'RATE_LIMIT', 'FORBIDDEN', 'LAST_MANAGER', 'INVALID_ASSIGNEE',
 ];
 
 export function errorCode(err: unknown): string {
@@ -88,6 +88,7 @@ export function errorCode(err: unknown): string {
   if (code && CODES.includes(code)) return code;
   if (e?.status === 429) return 'RATE_LIMIT';
   if (e?.status === 401) return 'UNAUTHORIZED';
+  if (e?.status === 403) return 'FORBIDDEN';
   if (e?.status === 404) return 'NOT_FOUND';
   return 'SERVER_ERROR';
 }
@@ -101,7 +102,7 @@ export function invalidateBusiness(qc: QueryClient) {
   return qc.invalidateQueries({
     predicate: (q) => {
       const k = q.queryKey[0];
-      return typeof k === 'string' && (k.startsWith('/api/jobs') || k.startsWith('/api/dashboard') || k.startsWith('/api/reference-data'));
+      return typeof k === 'string' && (k.startsWith('/api/jobs') || k === '/api/workspaces' || k === '/api/workspace/members' || k.startsWith('/api/dashboard') || k.startsWith('/api/reference-data'));
     },
   });
 }
@@ -115,4 +116,16 @@ export function cleanParams<T extends Record<string, string | undefined>>(p: T):
   const out: Record<string, string> = {};
   for (const [k, v] of Object.entries(p)) if (v) out[k] = v;
   return Object.keys(out).length ? (out as Partial<T>) : undefined;
+}
+
+/** Unsaved-draft registry so workspace switches can warn before discarding a form. */
+let dirtyDrafts = 0;
+export function markDraftDirty(delta: 1 | -1) { dirtyDrafts = Math.max(0, dirtyDrafts + delta); }
+export function hasDirtyDraft() { return dirtyDrafts > 0; }
+
+/** Removes all workspace-scoped cached data, keeping only the given workspace record. */
+export function clearScopedData(qc: QueryClient) {
+  void qc.cancelQueries({ predicate: (q) => q.queryKey[0] !== '/api/workspace' });
+  qc.removeQueries({ predicate: (q) => q.queryKey[0] !== '/api/workspace' });
+  qc.getMutationCache().clear();
 }

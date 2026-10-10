@@ -2,13 +2,13 @@ import type { ReactNode } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import { LayoutGrid, ListChecks, PlusSquare, SlidersHorizontal, Languages, Database, LogIn, LogOut, ChevronDown, Lock, FlaskConical } from 'lucide-react';
-import { useSwitchWorkspace, getGetWorkspaceQueryKey, type Workspace } from '@workspace/api-client-react';
+import { LayoutGrid, ListChecks, PlusSquare, SlidersHorizontal, Languages, Database, LogIn, LogOut, ChevronDown, Lock, FlaskConical, Users } from 'lucide-react';
+import { useSwitchWorkspace, useListWorkspaces, getGetWorkspaceQueryKey, getListWorkspacesQueryKey, type Workspace } from '@workspace/api-client-react';
 import { useAuth } from '@workspace/replit-auth-web';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
-import { useErrorText } from '@/lib/format';
+import { clearScopedData, hasDirtyDraft, useErrorText } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 const NAV = [
@@ -32,20 +32,24 @@ export function useWorkspaceSwitch() {
   const { isAuthenticated, login } = useAuth();
   const sw = useSwitchWorkspace({
     mutation: {
-      onSuccess: (ws) => {
-        qc.clear();
+      onSuccess: async (ws) => {
+        // Keep the active workspace query/observer: clearing it leaves the
+        // mounted gate subscribed to an orphan query until a page reload.
+        await qc.cancelQueries();
+        clearScopedData(qc);
         qc.setQueryData(getGetWorkspaceQueryKey(), ws);
         toast({ title: t('workspace.switched') });
       },
       onError: (e) => toast({ title: errText(e), variant: 'destructive' }),
     },
   });
-  const go = (mode: 'demo' | 'private') => {
+  const go = (mode: 'demo' | 'private', workspaceId?: string) => {
     if (mode === 'private' && !isAuthenticated) {
       login();
       return;
     }
-    sw.mutate({ data: { mode } });
+    if (hasDirtyDraft() && !window.confirm(t('roles.discard'))) return;
+    sw.mutate({ data: workspaceId ? { mode, workspaceId } : { mode } });
   };
   return { go, pending: sw.isPending };
 }
@@ -71,6 +75,8 @@ function WorkspaceMenu({ ws }: { ws: Workspace }) {
   const { t } = useTranslation();
   const { user, isAuthenticated, login, logout } = useAuth();
   const { go, pending } = useWorkspaceSwitch();
+  const list = useListWorkspaces({ query: { enabled: isAuthenticated, queryKey: getListWorkspacesQueryKey(), refetchInterval: 15_000 } });
+  const others = (list.data ?? []).filter((c) => c.id !== ws.id);
   const name = user ? [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email || user.id : '';
   return (
     <DropdownMenu>
@@ -85,7 +91,24 @@ function WorkspaceMenu({ ws }: { ws: Workspace }) {
         <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
           {isAuthenticated ? t('workspace.signedInAs', { name }) : t('workspace.notSignedIn')}
         </DropdownMenuLabel>
+        {ws.userId && (
+          <DropdownMenuLabel className="text-[11px] font-normal text-muted-foreground">
+            {t('roles.accountId')}: <span dir="ltr" className="select-all break-all font-mono text-foreground" data-testid="text-menu-account-id">{ws.userId}</span>
+          </DropdownMenuLabel>
+        )}
+        {!ws.isDemo && (
+          <DropdownMenuLabel className="text-[11px] font-normal text-muted-foreground" data-testid="text-menu-role">
+            {t('roles.role')}: {t(`roles.${ws.role}`)}
+          </DropdownMenuLabel>
+        )}
         <DropdownMenuSeparator />
+        {others.map((c) => (
+          <DropdownMenuItem key={c.id} className="min-h-11 lg:min-h-8" onSelect={() => go('private', c.id)} data-testid={`menu-workspace-${c.id}`}>
+            <Users className="h-4 w-4" aria-hidden />
+            <span className="min-w-0 truncate font-mono text-xs" dir="ltr">{c.id}</span>
+            <span className="ms-auto text-[11px] text-muted-foreground">{t(`roles.${c.role}`)}</span>
+          </DropdownMenuItem>
+        ))}
         {ws.isDemo ? (
           <DropdownMenuItem className="min-h-11 lg:min-h-8" onSelect={() => go('private')} data-testid="menu-switch-private">
             <Lock className="h-4 w-4" aria-hidden />
@@ -117,6 +140,7 @@ function WorkspaceMenu({ ws }: { ws: Workspace }) {
 export function Shell({ ws, children }: { ws: Workspace; children: ReactNode }) {
   const { t } = useTranslation();
   const [loc] = useLocation();
+  const nav = ws.role === 'worker' ? NAV.filter((n) => n.key !== 'dashboard') : NAV;
   return (
     <div className="min-h-[100dvh] bg-background">
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:start-2 focus:top-2 focus:z-50 focus:rounded focus:bg-card focus:p-2">
@@ -132,7 +156,7 @@ export function Shell({ ws, children }: { ws: Workspace; children: ReactNode }) 
             </span>
           </Link>
           <nav aria-label={t('nav.menu')} className="ms-6 hidden items-center gap-1 lg:flex">
-            {NAV.map(({ href, key, Icon }) => (
+            {nav.map(({ href, key, Icon }) => (
               <Link
                 key={href}
                 href={href}
@@ -162,8 +186,8 @@ export function Shell({ ws, children }: { ws: Workspace; children: ReactNode }) 
       <main id="main" className="mx-auto max-w-7xl px-3 pb-24 pt-5 sm:px-5 lg:pb-10">
         {children}
       </main>
-      <nav aria-label={t('nav.menu')} className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-border bg-card lg:hidden">
-        {NAV.map(({ href, key, Icon }) => (
+      <nav aria-label={t('nav.menu')} className="fixed inset-x-0 bottom-0 z-30 grid border-t border-border bg-card lg:hidden" style={{ gridTemplateColumns: `repeat(${nav.length}, minmax(0, 1fr))` }}>
+        {nav.map(({ href, key, Icon }) => (
           <Link
             key={href}
             href={href}

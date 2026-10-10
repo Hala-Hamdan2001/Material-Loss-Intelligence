@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { randomUUID } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
+import { requireManager, mutate } from "../lib/permissions";
 import OpenAI from "openai";
 import { z } from "zod";
 import { and, eq, desc } from "drizzle-orm";
@@ -17,6 +18,7 @@ router.post("/jobs/:id/insights", async (req,res) => {
   const {id} = GenerateInsightParams.parse(req.params);
   const input = GenerateInsightBody.parse(req.body);
   const org = await workspace(req,res);
+  requireManager(org);
   const jobs = await allJobs(org); const job = jobs.find(j => j.id === id) ?? fail(404,"NOT_FOUND");
   if (job.status !== "closed") fail(400,"REQUIRED_FIELDS");
   const candidates = previousJobs(job,jobs);
@@ -58,7 +60,9 @@ router.post("/jobs/:id/insights", async (req,res) => {
     }
   }
   const text = summary(job,comparison,historical,input.language,selected);
-  await db.insert(materialInsights).values({id:randomUUID(),jobId:id,revision:job.revision,language:input.language,comparisonId:comparison?.id ?? "",text,source,evidence});
+  await mutate(org, true, async tx => {
+    await tx.insert(materialInsights).values({id:randomUUID(),jobId:id,revision:job.revision,language:input.language,comparisonId:comparison?.id ?? "",text,source,evidence});
+  });
   res.json(GenerateInsightResponse.parse({text,source,language:input.language,revision:job.revision}));
 });
 export default router;

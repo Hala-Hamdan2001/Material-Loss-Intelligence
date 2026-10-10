@@ -61,6 +61,7 @@ export default function JobNew() {
         serverError={serverError ? t(serverError) : null}
         onSubmit={onSubmit}
         onCancel={() => navigate('/jobs')}
+        allowClose={ws.data?.role !== 'worker'}
       />
     </div>
   );

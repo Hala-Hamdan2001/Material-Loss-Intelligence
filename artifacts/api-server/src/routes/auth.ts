@@ -227,6 +227,7 @@ router.get('/callback', async (req: Request, res: Response) => {
 
 router.get('/logout', async (req: Request, res: Response) => {
   res.clearCookie('mli_mode', { path: '/' });
+  res.clearCookie('mli_workspace', { path: '/' });
   const config = await getOidcConfig();
   const origin = getOrigin(req);
   const returnTo = getSafeReturnTo(req.query.returnTo);

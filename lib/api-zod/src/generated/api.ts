@@ -17,12 +17,19 @@ export const GetWorkspaceResponse = zod.object({
   "isDemo": zod.boolean(),
   "tolerance": zod.number(),
   "highScrapThreshold": zod.number(),
-  "baselineGap": zod.number()
+  "baselineGap": zod.number(),
+  "role": zod.enum(['demo', 'manager', 'worker']),
+  "userId": zod.string().nullable()
 })
 
 
+export const switchWorkspaceBodyWorkspaceIdMax = 100;
+
+
+
 export const SwitchWorkspaceBody = zod.object({
-  "mode": zod.enum(['demo', 'private'])
+  "mode": zod.enum(['demo', 'private']),
+  "workspaceId": zod.string().min(1).max(switchWorkspaceBodyWorkspaceIdMax).optional()
 })
 
 export const SwitchWorkspaceResponse = zod.object({
@@ -30,7 +37,9 @@ export const SwitchWorkspaceResponse = zod.object({
   "isDemo": zod.boolean(),
   "tolerance": zod.number(),
   "highScrapThreshold": zod.number(),
-  "baselineGap": zod.number()
+  "baselineGap": zod.number(),
+  "role": zod.enum(['demo', 'manager', 'worker']),
+  "userId": zod.string().nullable()
 })
 
 
@@ -52,7 +61,9 @@ export const UpdateSettingsResponse = zod.object({
   "isDemo": zod.boolean(),
   "tolerance": zod.number(),
   "highScrapThreshold": zod.number(),
-  "baselineGap": zod.number()
+  "baselineGap": zod.number(),
+  "role": zod.enum(['demo', 'manager', 'worker']),
+  "userId": zod.string().nullable()
 })
 
 
@@ -155,7 +166,9 @@ export const GetDashboardResponse = zod.object({
   "id": zod.string(),
   "text": zod.string(),
   "createdAt": zod.string()
-}))
+})),
+  "createdBy": zod.string().nullable(),
+  "assignedTo": zod.string().nullable()
 }))),
   "attentionJobs": zod.array(zod.object({
   "reference": zod.string().min(1).max(getDashboardResponseAttentionJobsItemOneReferenceMax),
@@ -197,7 +210,9 @@ export const GetDashboardResponse = zod.object({
   "id": zod.string(),
   "text": zod.string(),
   "createdAt": zod.string()
-}))
+})),
+  "createdBy": zod.string().nullable(),
+  "assignedTo": zod.string().nullable()
 }))),
   "scrapReasons": zod.array(zod.object({
   "reason": zod.string(),
@@ -275,7 +290,9 @@ export const ListJobsResponseItem = zod.object({
   "id": zod.string(),
   "text": zod.string(),
   "createdAt": zod.string()
-}))
+})),
+  "createdBy": zod.string().nullable(),
+  "assignedTo": zod.string().nullable()
 }))
 export const ListJobsResponse = zod.array(ListJobsResponseItem)
 
@@ -374,7 +391,9 @@ export const CreateJobResponse = zod.object({
   "id": zod.string(),
   "text": zod.string(),
   "createdAt": zod.string()
-}))
+})),
+  "createdBy": zod.string().nullable(),
+  "assignedTo": zod.string().nullable()
 }))
 
 
@@ -441,7 +460,9 @@ export const GetJobResponse = zod.object({
   "id": zod.string(),
   "text": zod.string(),
   "createdAt": zod.string()
-}))
+})),
+  "createdBy": zod.string().nullable(),
+  "assignedTo": zod.string().nullable()
 }))
 
 
@@ -545,7 +566,9 @@ export const UpdateJobResponse = zod.object({
   "id": zod.string(),
   "text": zod.string(),
   "createdAt": zod.string()
-}))
+})),
+  "createdBy": zod.string().nullable(),
+  "assignedTo": zod.string().nullable()
 }))
 
 
@@ -616,7 +639,9 @@ export const CloseJobResponse = zod.object({
   "id": zod.string(),
   "text": zod.string(),
   "createdAt": zod.string()
-}))
+})),
+  "createdBy": zod.string().nullable(),
+  "assignedTo": zod.string().nullable()
 }))
 
 
@@ -692,7 +717,9 @@ export const ReopenJobResponse = zod.object({
   "id": zod.string(),
   "text": zod.string(),
   "createdAt": zod.string()
-}))
+})),
+  "createdBy": zod.string().nullable(),
+  "assignedTo": zod.string().nullable()
 }))
 
 
@@ -767,7 +794,9 @@ export const AddInvestigationNoteResponse = zod.object({
   "id": zod.string(),
   "text": zod.string(),
   "createdAt": zod.string()
-}))
+})),
+  "createdBy": zod.string().nullable(),
+  "assignedTo": zod.string().nullable()
 }))
 
 
@@ -856,7 +885,9 @@ export const GetComparisonResponse = zod.object({
   "id": zod.string(),
   "text": zod.string(),
   "createdAt": zod.string()
-}))
+})),
+  "createdBy": zod.string().nullable(),
+  "assignedTo": zod.string().nullable()
 }))),
   "selected": zod.union([zod.object({
   "reference": zod.string().min(1).max(getComparisonResponseSelectedOneOneReferenceMax),
@@ -898,7 +929,9 @@ export const GetComparisonResponse = zod.object({
   "id": zod.string(),
   "text": zod.string(),
   "createdAt": zod.string()
-}))
+})),
+  "createdBy": zod.string().nullable(),
+  "assignedTo": zod.string().nullable()
 })),zod.null()]),
   "difference": zod.number().nullable(),
   "baseline": zod.object({
@@ -972,5 +1005,114 @@ export const ExchangeMobileAuthorizationCodeResponse = zod.object({
 export const LogoutMobileSessionResponse = zod.object({
   "success": zod.boolean()
 })
+
+
+export const ListWorkspacesResponseItem = zod.object({
+  "id": zod.string(),
+  "role": zod.enum(['manager', 'worker'])
+})
+export const ListWorkspacesResponse = zod.array(ListWorkspacesResponseItem)
+
+
+export const ListMembersResponseItem = zod.object({
+  "userId": zod.string(),
+  "role": zod.enum(['manager', 'worker']),
+  "active": zod.boolean()
+})
+export const ListMembersResponse = zod.array(ListMembersResponseItem)
+
+
+export const saveMemberBodyUserIdMax = 100;
+
+
+
+export const SaveMemberBody = zod.object({
+  "userId": zod.string().min(1).max(saveMemberBodyUserIdMax),
+  "role": zod.enum(['manager', 'worker']),
+  "active": zod.boolean()
+})
+
+export const SaveMemberResponse = zod.object({
+  "userId": zod.string(),
+  "role": zod.enum(['manager', 'worker']),
+  "active": zod.boolean()
+})
+
+
+export const AssignJobParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+
+
+export const AssignJobBody = zod.object({
+  "assignedTo": zod.string().nullable(),
+  "revision": zod.number().int().min(1)
+})
+
+export const assignJobResponseOneReferenceMax = 80;
+
+export const assignJobResponseOneIssuedMin = 0;
+export const assignJobResponseOneIssuedMax = 100000000;
+
+export const assignJobResponseOneGoodMin = 0;
+export const assignJobResponseOneGoodMax = 100000000;
+
+export const assignJobResponseOneReusableMin = 0;
+export const assignJobResponseOneReusableMax = 100000000;
+
+export const assignJobResponseOneReworkMin = 0;
+export const assignJobResponseOneReworkMax = 100000000;
+
+export const assignJobResponseOneScrapEntriesItemWeightMin = 0;
+export const assignJobResponseOneScrapEntriesItemWeightMax = 100000000;
+
+
+
+export const AssignJobResponse = zod.object({
+  "reference": zod.string().min(1).max(assignJobResponseOneReferenceMax),
+  "product": zod.string(),
+  "material": zod.string(),
+  "machine": zod.string(),
+  "issued": zod.number().min(assignJobResponseOneIssuedMin).max(assignJobResponseOneIssuedMax),
+  "good": zod.number().min(assignJobResponseOneGoodMin).max(assignJobResponseOneGoodMax),
+  "reusable": zod.number().min(assignJobResponseOneReusableMin).max(assignJobResponseOneReusableMax),
+  "rework": zod.number().min(assignJobResponseOneReworkMin).max(assignJobResponseOneReworkMax),
+  "scrapEntries": zod.array(zod.object({
+  "reason": zod.string(),
+  "weight": zod.number().min(assignJobResponseOneScrapEntriesItemWeightMin).max(assignJobResponseOneScrapEntriesItemWeightMax)
+})),
+  "notes": zod.string()
+}).and(zod.object({
+  "id": zod.string(),
+  "status": zod.enum(['draft', 'closed']),
+  "revision": zod.number().int(),
+  "createdAt": zod.string(),
+  "closedAt": zod.string().nullable(),
+  "isDemo": zod.boolean(),
+  "tolerance": zod.number(),
+  "metrics": zod.object({
+  "scrap": zod.number(),
+  "accounted": zod.number(),
+  "residual": zod.number(),
+  "yieldPercent": zod.number(),
+  "scrapPercent": zod.number(),
+  "reusablePercent": zod.number(),
+  "reworkPercent": zod.number(),
+  "balanced": zod.boolean(),
+  "largestReason": zod.string(),
+  "largestWeight": zod.number(),
+  "largestContribution": zod.number()
+}),
+  "signals": zod.array(zod.enum(['high_scrap', 'above_baseline', 'insufficient_history'])),
+  "investigationNotes": zod.array(zod.object({
+  "id": zod.string(),
+  "text": zod.string(),
+  "createdAt": zod.string()
+})),
+  "createdBy": zod.string().nullable(),
+  "assignedTo": zod.string().nullable()
+}))
 
 
