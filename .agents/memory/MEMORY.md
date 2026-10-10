@@ -1,3 +1,4 @@
 - [Accounting and insight boundaries](accounting-boundaries.md) — keep rework/offcuts separate and AI claims evidence-locked.
 - [Code generation compatibility](codegen-compatibility.md) — Orval path/query name collisions and iterable DOM typings.
 - [Isolated browser regressions](testing-isolation.md) — persistent temporary APIs and explicit scratch cleanup protect existing records.
+- [OIDC preview cookies](oidc-preview-cookies.md) — compare delivered cookie attributes with server options; development delivery can differ.

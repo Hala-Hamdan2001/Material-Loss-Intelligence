@@ -1,0 +1,46 @@
+Continue the authentication audit for the existing Material Loss Intelligence application.
+
+## Observed behavior
+
+I completed a real Replit login and consent flow successfully. The application opened, my account had the Manager role in the Private workspace, and the Demo workspace worked correctly.
+
+I then logged out from the application. It correctly displayed that I was not logged in and offered two options:
+
+* Log in
+* Log in to use Private Workspace
+
+Both options lead to the same Replit OIDC consent page, displaying my already-authenticated Replit account and asking for permission to access my email, basic profile information, and stay signed in to this application.
+
+After returning to that page, opening the application in another browser tab produced the same result.
+
+## Task
+
+Investigate this exact logout → login-again flow in the existing code.
+
+1. Trace both login buttons through the frontend routes and the server-side OIDC start, callback, session creation, and logout handlers.
+2. Determine whether both buttons are intentionally using the same OIDC flow and whether that is correct.
+3. Verify that local session deletion is completed before logout redirects or provider requests.
+4. Check the callback nonce-cookie validation, state validation, PKCE verification, cookie settings, session persistence, and callback error handling.
+5. Determine whether the consent screen appearing again is expected behavior, a Replit provider behavior, or evidence of an application bug. Do not guess.
+6. Check whether the application can establish a new authenticated local session after the user approves again, and whether `/api/auth/user` reflects the correct state before and after logout/login.
+7. Do not expose credentials, cookies, tokens, or personal account details in logs or the final report.
+
+## Constraints
+
+* Do not change the UI, database schema, business records, workspace permissions, charts, or existing features.
+* Do not disable nonce/state/PKCE checks or weaken authentication to make the flow pass.
+* Do not create mock login endpoints, simulated users, or Presentation Mode.
+* Reproduce using safe isolated tests where possible. Do not use destructive operations against the normal database.
+* Make code changes only if a specific defect is confirmed, and add a regression test for it.
+
+## Final report
+
+Tell me:
+
+* Whether logout genuinely invalidates the local session.
+* Whether login after logout works correctly.
+* Whether the two login options are supposed to lead to the same provider consent screen.
+* What was tested with a real browser/provider and what was only tested synthetically.
+* Any remaining manual test I need to perform.
+
+Do not claim full authentication verification unless the complete real login → callback → authenticated session → logout → login-again flow has been verified.
