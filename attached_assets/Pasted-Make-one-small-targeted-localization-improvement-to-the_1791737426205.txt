@@ -1,0 +1,25 @@
+Make one small, targeted localization improvement to the existing CSV export feature in Material Loss Intelligence.
+
+**Goal:** Make CSV column headers follow the application's current language:
+
+* When the app language is Arabic, export Arabic column headers.
+* When the app language is English, export English column headers.
+
+**Strict requirements:**
+
+1. Inspect the existing CSV export implementation and reuse the application's existing language/localization state and conventions. Do not create a separate language setting.
+2. Localize only the CSV column header labels. Keep exported data values, dates, numbers, job IDs, material names, machine names, status values, and investigation notes unchanged. Do not translate user-entered content.
+3. Preserve all existing CSV behavior, including current filters, exported columns, data accuracy, UTF-8 BOM for Arabic/Excel compatibility, proper CSV escaping/quoting, and formula-injection protection.
+4. Do not change permissions, authentication, database schema/data, dashboard charts, accounting calculations, job workflows, UI design, or any unrelated feature.
+5. Keep the existing Manager-only export permission and current Demo/Private workspace isolation unchanged.
+6. Use clear, consistent Arabic header translations that accurately match the existing English column meanings. Preserve the existing column order.
+
+**Verification:**
+
+* Run the existing relevant tests and add or update focused tests for both Arabic and English header labels.
+* Verify that Arabic export still includes the UTF-8 BOM and that CSV escaping and formula-injection protection still work.
+* Verify that only the headers change with the selected language and that all exported data remains unchanged.
+* Run the relevant typecheck/build checks.
+* Report exactly what changed and which checks passed. If the language state cannot be accessed safely by the export code, explain the limitation instead of introducing a risky workaround.
+
+**Important:** Do not rebuild the app or make unrelated improvements. This is a small final fix to an already working project.

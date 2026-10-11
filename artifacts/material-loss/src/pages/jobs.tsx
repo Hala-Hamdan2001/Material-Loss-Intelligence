@@ -20,7 +20,7 @@ const KEYS = ['search', 'from', 'to', 'machine', 'material', 'status'] as const;
 const selectCls = 'mt-1 h-11 w-full rounded-lg border border-input bg-card px-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-ring lg:h-9';
 
 export default function Jobs() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const f = useFmt();
   const errText = useErrorText();
   const ref = useGetReferenceData({ query: { staleTime: 60_000, queryKey: getGetReferenceDataQueryKey() } });
@@ -60,7 +60,7 @@ export default function Jobs() {
     const controller = new AbortController();
     exportRequest.current = controller;
     try {
-      await downloadJobsCsv(params, controller.signal);
+      await downloadJobsCsv({ ...params, language: i18n.language === 'ar' ? 'ar' : 'en' }, controller.signal);
     } catch (e) {
       if (controller.signal.aborted) return;
       setExportError(`${t('jobs.exportError')} ${errText(e)}`);

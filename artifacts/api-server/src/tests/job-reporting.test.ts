@@ -30,5 +30,26 @@ assert.ok(csv.includes('"100","80","10"'));
 assert.ok(csv.includes("unspecified_demo: 10"));
 assert.ok(csv.endsWith("\r\n"));
 assert.equal(jobsCsv([]).split("\r\n").length,2);
+const englishHeaders = ["Job number", "Created date", "Product", "Material", "Machine",
+  "Issued (kg)", "Good output (kg)", "Scrap (kg)", "Scrap reasons (kg)",
+  "Reusable offcuts (kg)", "Rework (kg)", "Yield (%)", "Scrap (%)", "Accounting status", "Closed date"];
+const arabicHeaders = ["رقم الأمر", "تاريخ الإنشاء", "المنتج", "المادة", "الآلة",
+  "الوزن المصروف (كغ)", "الإنتاج السليم (كغ)", "الخردة (كغ)", "أسباب الخردة (كغ)",
+  "القصاصات القابلة لإعادة الاستخدام (كغ)", "إعادة التشغيل (كغ)", "المردود (%)", "نسبة الخردة (%)",
+  "الحالة المحاسبية", "تاريخ الإغلاق"];
+assert.equal(jobsCsv(jobs, "en"), csv);
+const tricky = [...jobs, make("=1+1", { product: 'منتج,"خاص"\nسطر', machine: "@SUM(A1)", material: "  +cmd" })];
+for (const [language, headers] of [["en", englishHeaders], ["ar", arabicHeaders]] as const) {
+  const localized = jobsCsv(tricky, language);
+  assert.equal(localized.split("\r\n")[0], "\uFEFF" + headers.map(csvCell).join(","));
+  assert.equal(Buffer.from(localized).subarray(0,3).toString("hex"), "efbbbf");
+  assert.ok(localized.includes('"\'=1+1"'));
+  assert.ok(localized.includes('"\'@SUM(A1)"'));
+  assert.ok(localized.includes('"\'  +cmd"'));
+  assert.ok(localized.includes('"منتج,""خاص""\nسطر"'));
+  assert.equal(jobsCsv([], language), "\uFEFF" + headers.map(csvCell).join(",") + "\r\n");
+}
+const dataRows = (text: string) => text.slice(text.indexOf("\r\n") + 2);
+assert.equal(dataRows(jobsCsv(tricky, "ar")), dataRows(jobsCsv(tricky, "en")));
 assert.equal(JSON.stringify(jobs),before);
 console.log("Board mapping, filters, CSV escaping/encoding/formula protection and immutability passed");

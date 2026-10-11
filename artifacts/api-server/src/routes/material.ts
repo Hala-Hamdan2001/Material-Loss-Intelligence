@@ -6,7 +6,7 @@ import {
   CreateJobBody, UpdateJobBody, CloseJobBody, ReopenJobBody, AddInvestigationNoteBody,
   SwitchWorkspaceBody, UpdateSettingsBody, GetJobParams, GetComparisonQueryParams, ListJobsQueryParams,
   GetDashboardQueryParams, GetWorkspaceResponse, GetReferenceDataResponse, GetDashboardResponse,
-  ListJobsResponse, GetJobResponse, GetComparisonResponse,
+  ListJobsResponse, GetJobResponse, GetComparisonResponse, ExportJobsCsvQueryParams,
 } from "@workspace/api-zod";
 import { aggregate, baseline, closureError, previousJobs, validWeight } from "@workspace/material-accounting";
 import { allJobs, getJob, workspace, workspaceView, fail, writeValues, validateInput, cookieOptions } from "../lib/material-store";
@@ -75,13 +75,13 @@ router.get("/jobs/board", async (req,res) => {
 });
 router.get("/jobs/export.csv", async (req,res) => {
   const org = await workspace(req,res); requireManager(org);
-  const q = ListJobsQueryParams.parse(req.query); validateDate(q.from); validateDate(q.to);
+  const q = ExportJobsCsvQueryParams.parse(req.query); validateDate(q.from); validateDate(q.to);
   if (q.from && q.to && q.from > q.to) fail(400,"INVALID_INPUT");
   const jobs = filterJobs(await allJobs(org), q);
   res.setHeader("Content-Type", "text/csv; charset=utf-8");
   res.setHeader("Content-Disposition", 'attachment; filename="material-loss-jobs.csv"');
   res.setHeader("X-Content-Type-Options", "nosniff");
-  res.send(jobsCsv(jobs));
+  res.send(jobsCsv(jobs, q.language));
 });
 router.post("/jobs", async (req,res) => {
   const input = CreateJobBody.parse(req.body); validateInput(input);

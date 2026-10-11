@@ -26,13 +26,19 @@ export function csvCell(value: string | number | null): string {
   return `"${text.replace(/"/g, '""')}"`;
 }
 
-export function jobsCsv(jobs: JobView[]) {
-  const rows: (string | number | null)[][] = [[
+export function jobsCsv(jobs: JobView[], language: "en" | "ar" = "en") {
+  const headers = language === "ar" ? [
+    "رقم الأمر", "تاريخ الإنشاء", "المنتج", "المادة", "الآلة",
+    "الوزن المصروف (كغ)", "الإنتاج السليم (كغ)", "الخردة (كغ)", "أسباب الخردة (كغ)",
+    "القصاصات القابلة لإعادة الاستخدام (كغ)", "إعادة التشغيل (كغ)", "المردود (%)", "نسبة الخردة (%)",
+    "الحالة المحاسبية", "تاريخ الإغلاق",
+  ] : [
     "Job number", "Created date", "Product", "Material", "Machine",
     "Issued (kg)", "Good output (kg)", "Scrap (kg)", "Scrap reasons (kg)",
     "Reusable offcuts (kg)", "Rework (kg)", "Yield (%)", "Scrap (%)",
     "Accounting status", "Closed date",
-  ], ...jobs.map(j => [
+  ];
+  const rows: (string | number | null)[][] = [headers, ...jobs.map(j => [
     j.reference, j.createdAt, j.product, j.material, j.machine, j.issued, j.good,
     j.metrics.scrap, j.scrapEntries.map(e => `${e.reason}: ${e.weight}`).join("; "),
     j.reusable, j.rework, j.metrics.yieldPercent, j.metrics.scrapPercent,

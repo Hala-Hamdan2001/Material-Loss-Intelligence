@@ -351,6 +351,10 @@ export type GetJobBoard200 = {
 };
 
 export type ExportJobsCsvParams = {
+/**
+ * Header language only; exported data values remain unchanged. Defaults to English.
+ */
+language?: ExportJobsCsvLanguage;
 search?: string;
 machine?: string;
 material?: string;
@@ -358,6 +362,14 @@ status?: ExportJobsCsvStatus;
 from?: string;
 to?: string;
 };
+
+export type ExportJobsCsvLanguage = typeof ExportJobsCsvLanguage[keyof typeof ExportJobsCsvLanguage];
+
+
+export const ExportJobsCsvLanguage = {
+  en: 'en',
+  ar: 'ar',
+} as const;
 
 export type ExportJobsCsvStatus = typeof ExportJobsCsvStatus[keyof typeof ExportJobsCsvStatus];
 

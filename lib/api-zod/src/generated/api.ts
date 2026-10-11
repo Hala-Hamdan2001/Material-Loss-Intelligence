@@ -202,7 +202,10 @@ export const GetJobBoardResponse = zod.object({
 /**
  * Manager or Demo only. UTF-8 BOM CSV; filters have the same semantics as GET /jobs.
  */
+export const exportJobsCsvQueryLanguageDefault = `en`;
+
 export const ExportJobsCsvQueryParams = zod.object({
+  "language": zod.enum(['en', 'ar']).default(exportJobsCsvQueryLanguageDefault).describe('Header language only; exported data values remain unchanged. Defaults to English.'),
   "search": zod.coerce.string().optional(),
   "machine": zod.coerce.string().optional(),
   "material": zod.coerce.string().optional(),

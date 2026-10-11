@@ -36,6 +36,7 @@
         "operationId": "exportJobsCsv",
         "description": "Manager or Demo only. UTF-8 BOM CSV; filters have the same semantics as GET /jobs.",
         "parameters": [
+          {"name":"language","in":"query","description":"Header language only; exported data values remain unchanged. Defaults to English.","schema":{"type":"string","enum":["en","ar"],"default":"en"}},
           {"name":"search","in":"query","schema":{"type":"string"}},
           {"name":"machine","in":"query","schema":{"type":"string"}},
           {"name":"material","in":"query","schema":{"type":"string"}},
